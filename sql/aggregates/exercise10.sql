@@ -4281,16 +4281,13 @@ CREATE INDEX "members.recommendedby"
 
 ANALYZE;
 
-select name, sum(slots * case
-                      when memid = 0 then facs.guestcost
-                      else facs.membercost
-                      end) as revenue
-from cd.facilities facs
-join cd.bookings bks
-on facs.facid = bks.facid
-group by facs.name
-having sum(slots * case
-                      when memid = 0 then facs.guestcost
-                      else facs.membercost
-                      end) < 1000
-order by revenue;
+select name, revenue from (
+select facs.name, sum(case 
+when memid = 0 then slots * facs.guestcost
+else slots * membercost
+end) as revenue
+from cd.bookings bks
+join cd.facilities facs
+on bks.facid = facs.facid
+group by facs.name) as agg where revenue < 1000
+order by revenue;          

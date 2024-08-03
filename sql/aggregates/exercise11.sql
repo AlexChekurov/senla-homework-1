@@ -4281,8 +4281,10 @@ CREATE INDEX "members.recommendedby"
 
 ANALYZE;
 
-select facid, sum(slots) as "Total Slots"
+select facid, sum(slots) as totalslots
 from cd.bookings
 group by facid
-order by sum(slots) desc
-limit 1;          
+having sum(slots) = (select max(sum2.totalslots) from
+(select sum(slots) as totalslots
+from cd.bookings
+group by facid) as sum2);
