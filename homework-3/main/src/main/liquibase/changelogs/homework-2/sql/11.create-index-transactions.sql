@@ -1,0 +1,2 @@
+CREATE INDEX idx_transactions_source_account_id ON banking.transactions(source_account_id);
+CREATE INDEX idx_transactions_destination_account_id ON banking.transactions(destination_account_id);
