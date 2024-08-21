@@ -1,4 +1,4 @@
-package com.alex.annotations;
+package com.example.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.PARAMETER})
-public @interface Autowire {
+@Target(ElementType.FIELD)
+public @interface Value {
+    String value();
 }

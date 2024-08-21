@@ -1,19 +1,16 @@
-package com.alex.core;
+package com.example.core;
 
-import com.alex.annotations.Autowire;
-import com.alex.annotations.Value;
+import com.example.annotations.Autowire;
+import com.example.annotations.Value;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Properties;
 
 public class DependencyInjector {
     private final ApplicationContext context;
-    private final Properties properties;
 
-    public DependencyInjector(ApplicationContext context, Properties properties) {
+    public DependencyInjector(ApplicationContext context) {
         this.context = context;
-        this.properties = properties;
     }
 
     public void injectDependencies() {
@@ -38,7 +35,7 @@ public class DependencyInjector {
 
             if (field.isAnnotationPresent(Value.class)) {
                 Value valueAnnotation = field.getAnnotation(Value.class);
-                String value = properties.getProperty(valueAnnotation.value());
+                String value = context.getProperties().getProperty(valueAnnotation.value());
                 field.setAccessible(true);
                 try {
                     field.set(bean, value);

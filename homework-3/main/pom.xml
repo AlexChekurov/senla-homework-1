@@ -13,21 +13,18 @@
     <artifactId>main</artifactId>
 
     <dependencies>
-        <!-- Зависимость от модуля di -->
         <dependency>
             <groupId>com.example</groupId>
             <artifactId>di</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
 
-        <!-- Liquibase -->
         <dependency>
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
             <version>4.5.0</version>
         </dependency>
 
-        <!-- PostgreSQL JDBC -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -52,8 +49,8 @@
                 <configuration>
                     <changeLogFile>src/main/liquibase/changelog-master.xml</changeLogFile>
                     <url>jdbc:postgresql://localhost:5432/my_fintech_bank</url>
-                    <username>postgres</username>
-                    <password>postgres</password>
+                    <username>${env.DB_USERNAME}</username>
+                    <password>${env.DB_PASSWORD}</password>
                 </configuration>
             </plugin>
         </plugins>
@@ -70,31 +67,3 @@
     </build>
 
 </project>
-
-        <!--Старый, сгенерированный идеей помник-->
-
-        <!--<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"-->
-        <!--  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">-->
-        <!--  <modelVersion>4.0.0</modelVersion>-->
-
-        <!--  <groupId>org.example</groupId>-->
-        <!--  <artifactId>main</artifactId>-->
-        <!--  <version>1.0-SNAPSHOT</version>-->
-        <!--  <packaging>jar</packaging>-->
-
-        <!--  <name>main</name>-->
-        <!--  <url>http://maven.apache.org</url>-->
-
-        <!--  <properties>-->
-        <!--    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>-->
-        <!--  </properties>-->
-
-        <!--  <dependencies>-->
-        <!--    <dependency>-->
-        <!--      <groupId>junit</groupId>-->
-        <!--      <artifactId>junit</artifactId>-->
-        <!--      <version>3.8.1</version>-->
-        <!--      <scope>test</scope>-->
-        <!--    </dependency>-->
-        <!--  </dependencies>-->
-        <!--</project>-->

@@ -1,7 +1,7 @@
-package com.alex.utils;
+package com.example.utils;
 
-import com.alex.annotations.Component;
-import com.alex.annotations.Value;
+import com.example.annotations.Component;
+import com.example.annotations.Value;
 
 
 @Component

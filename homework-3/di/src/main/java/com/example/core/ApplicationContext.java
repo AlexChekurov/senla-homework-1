@@ -1,10 +1,12 @@
-package com.alex.core;
+package com.example.core;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 public class ApplicationContext {
     private final Map<Class<?>, Object> beans = new HashMap<>();
+    private final Properties properties = new Properties();
 
     public void addBean(Class<?> type, Object instance) {
         beans.put(type, instance);
@@ -21,5 +23,13 @@ public class ApplicationContext {
 
     public Iterable<Object> getAllBeans() {
         return beans.values();
+    }
+
+    public Properties getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Properties properties) {
+        this.properties.putAll(properties);
     }
 }

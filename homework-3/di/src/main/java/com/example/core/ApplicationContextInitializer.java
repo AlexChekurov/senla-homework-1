@@ -1,7 +1,7 @@
-package com.alex.core;
+package com.example.core;
 
-import com.alex.annotations.Autowire;
-import com.alex.annotations.Component;
+import com.example.annotations.Autowire;
+import com.example.annotations.Component;
 import org.reflections.Reflections;
 
 import java.io.IOException;
@@ -11,40 +11,35 @@ import java.lang.reflect.Constructor;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-
 public final class ApplicationContextInitializer {
-    private static final Properties properties = new Properties();
 
-    private ApplicationContextInitializer() {}
+    private ApplicationContextInitializer() {
+    }
 
     public static ApplicationContext initializeContext(String basePackage, Class<?> mainClass) {
         ApplicationContext context = new ApplicationContext();
-        loadProperties(mainClass);
+        Properties properties = loadProperties(mainClass);
+        context.setProperties(properties);
+
         List<Class<?>> allComponents = scanAllComponents(basePackage);
 
-        // Создаем и регистрируем компоненты без зависимостей (дефолтные конструкторы)
-        for (Class<?> component : allComponents) {
-            if (findAutowiredConstructor(component) == null) {
-                createInstance(component, context);
-            }
-        }
+        initializeComponents(allComponents, context);
 
-        // Создаем и регистрируем компоненты с конструкторами, требующими инъекций
-        for (Class<?> component : allComponents) {
-            if (findAutowiredConstructor(component) != null) {
-                createInstance(component, context);
-            }
-        }
-
-        // Инжектируем зависимости
         injectDependencies(context);
         return context;
     }
 
-    private static void loadProperties(Class<?> mainClass) {
+    private static void initializeComponents(List<Class<?>> allComponents, ApplicationContext context) {
+        allComponents.stream()
+                .sorted(Comparator.comparingInt(component -> findAutowiredConstructor(component).isPresent() ? 1 : -1))
+                .forEach(component -> createInstance(component, context));
+    }
+
+    private static Properties loadProperties(Class<?> mainClass) {
+        Properties properties = new Properties();
         try (InputStream input = mainClass.getClassLoader().getResourceAsStream("application.properties")) {
             if (input == null) {
-                return;
+                return properties;
             }
             try (InputStreamReader reader = new InputStreamReader(input, StandardCharsets.UTF_8)) {
                 properties.load(reader);
@@ -52,6 +47,7 @@ public final class ApplicationContextInitializer {
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+        return properties;
     }
 
     private static List<Class<?>> scanAllComponents(String basePackage) {
@@ -62,11 +58,12 @@ public final class ApplicationContextInitializer {
 
     private static void createInstance(Class<?> component, ApplicationContext context) {
         try {
-            Constructor<?> constructor = findAutowiredConstructor(component);
+            Optional<Constructor<?>> optionalConstructor = findAutowiredConstructor(component);
             Object instance;
 
-            if (constructor != null) {
-                // Создание объекта с использованием конструктора с @Autowire
+            if (optionalConstructor.isPresent()) {
+                Constructor<?> constructor = optionalConstructor.get();
+                // Create an object using a constructor with @Autowire
                 Class<?>[] paramTypes = constructor.getParameterTypes();
                 Object[] params = new Object[paramTypes.length];
 
@@ -76,7 +73,7 @@ public final class ApplicationContextInitializer {
 
                 instance = constructor.newInstance(params);
             } else {
-                // Создание объекта с использованием дефолтного конструктора
+                // Create an object using the default constructor
                 instance = component.getDeclaredConstructor().newInstance();
             }
 
@@ -89,16 +86,14 @@ public final class ApplicationContextInitializer {
     }
 
     private static void injectDependencies(ApplicationContext context) {
-        DependencyInjector injector = new DependencyInjector(context, properties);
+        DependencyInjector injector = new DependencyInjector(context);
         injector.injectDependencies();
     }
 
-    private static Constructor<?> findAutowiredConstructor(Class<?> clazz) {
-        for (Constructor<?> constructor : clazz.getDeclaredConstructors()) {
-            if (constructor.isAnnotationPresent(Autowire.class)) {
-                return constructor;
-            }
-        }
-        return null;
+    private static Optional<Constructor<?>> findAutowiredConstructor(Class<?> clazz) {
+        return Arrays.stream(clazz.getDeclaredConstructors())
+                .filter(constructor -> constructor.isAnnotationPresent(Autowire.class))
+                .findFirst();
     }
+
 }
