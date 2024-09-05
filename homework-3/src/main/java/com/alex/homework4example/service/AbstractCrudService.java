@@ -1,51 +1,58 @@
 package com.alex.homework4example.service;
 
 import com.alex.homework4example.dao.Dao;
-import com.alex.homework4example.mapper.Mapper;
-import com.alex.homework4example.service.CrudService;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-public abstract class AbstractCrudService<Entity, DTO, ID> implements CrudService<DTO, ID> {
+public abstract class AbstractCrudService<Entity> implements CrudService<Entity> {
 
-    protected abstract Dao<ID, Entity> getDao();
+    protected abstract Dao<Long, Entity> getDao();
 
-    protected abstract Mapper<Entity, DTO> getMapper();
+    protected void beforeCreate(Entity entity) {}
+    protected void afterCreate(Entity entity) {}
+
+    protected void beforeUpdate(Entity entity) {}
+    protected void afterUpdate(Entity entity) {}
+
+    protected void beforeDelete(Long id) {}
+    protected void afterDelete(Long id) {}
 
     @Override
-    public DTO create(DTO dto) {
-        Entity entity = getMapper().toEntity(dto);
+    public Entity create(Entity entity) {
+        beforeCreate(entity);
         getDao().save(entity);
-        return getMapper().toDto(entity);
+        afterCreate(entity);
+        return entity;
     }
 
     @Override
-    public Optional<DTO> findById(ID id) {
-        return getDao().findById(id).map(getMapper()::toDto);
+    public Optional<Entity> findById(Long id) {
+        return getDao().findById(id);
     }
 
     @Override
-    public List<DTO> findAll() {
-        return getDao().findAll().stream()
-                .map(getMapper()::toDto)
-                .collect(Collectors.toList());
+    public List<Entity> findAll() {
+        return getDao().findAll();
     }
 
     @Override
-    public DTO update(DTO dto) {
-        Entity entity = getMapper().toEntity(dto);
+    public Entity update(Entity entity) {
+        beforeUpdate(entity);
         if (getDao().update(entity)) {
-            return getMapper().toDto(entity);
+            afterUpdate(entity);
+            return entity;
         }
         throw new RuntimeException("Entity not found with id: " + getEntityId(entity));
     }
 
     @Override
-    public boolean delete(ID id) {
-        return getDao().delete(id);
+    public boolean delete(Long id) {
+        beforeDelete(id);
+        boolean result = getDao().delete(id);
+        afterDelete(id);
+        return result;
     }
 
-    protected abstract ID getEntityId(Entity entity);
+    protected abstract Long getEntityId(Entity entity);
 }

@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class Card {
-    private Integer id;
+    private Long id;
     private Account account;
     private Customer customer;
     private String cardNumber;

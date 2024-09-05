@@ -4,6 +4,7 @@ import com.alex.homework4example.dto.CustomerDTO;
 import com.alex.homework4example.entity.Customer;
 import com.alex.homework4example.entity.User;
 import com.alex.homework4example.dao.impl.UserDao;
+import com.alex.homework4example.exception.EntityNotFoundException;
 import com.alex.homework4example.mapper.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -29,13 +30,16 @@ public class CustomerMapper implements Mapper<Customer, CustomerDTO> {
                 .state(customer.getState())
                 .postalCode(customer.getPostalCode())
                 .country(customer.getCountry())
+                .createdAt(customer.getCreatedAt())
                 .userId(customer.getUser().getId())
                 .build();
     }
 
     @Override
     public Customer toEntity(CustomerDTO customerDTO) {
-        User user = userDao.findById(customerDTO.getUserId()).orElseThrow();
+        User user = userDao.findById(customerDTO.getUserId())
+                .orElseThrow(() -> new EntityNotFoundException("User with ID " + customerDTO.getUserId() + " not found"));
+
         return Customer.builder()
                 .id(customerDTO.getId())
                 .firstName(customerDTO.getFirstName())
@@ -47,8 +51,8 @@ public class CustomerMapper implements Mapper<Customer, CustomerDTO> {
                 .state(customerDTO.getState())
                 .postalCode(customerDTO.getPostalCode())
                 .country(customerDTO.getCountry())
+                .createdAt(customerDTO.getCreatedAt())
                 .user(user)
                 .build();
     }
-
 }

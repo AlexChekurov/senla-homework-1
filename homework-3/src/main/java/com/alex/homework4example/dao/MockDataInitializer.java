@@ -1,7 +1,6 @@
 package com.alex.homework4example.dao;
 
-import com.alex.homework4example.dto.*;
-import com.alex.homework4example.entity.Role;
+import com.alex.homework4example.entity.*;
 import com.alex.homework4example.service.impl.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,42 +12,42 @@ import java.time.LocalDateTime;
 @Component
 public class MockDataInitializer {
 
-    private final UserService userService;
-    private final CustomerService customerService;
-    private final AccountService accountService;
-    private final CustomerAccountService customerAccountService;
-    private final TransactionService transactionService;
-    private final CardService cardService;
+    private final UserServiceImpl userService;
+    private final CustomerServiceImpl customerService;
+    private final AccountServiceImpl accountService;
+    private final TransactionServiceImpl transactionService;
+    private final CardServiceImpl cardService;
 
     @Autowired
-    public MockDataInitializer(UserService userService, CustomerService customerService,
-                               AccountService accountService, CustomerAccountService customerAccountService,
-                               TransactionService transactionService, CardService cardService) {
+    public MockDataInitializer(UserServiceImpl userService, CustomerServiceImpl customerService,
+                               AccountServiceImpl accountService, TransactionServiceImpl transactionService,
+                               CardServiceImpl cardService) {
         this.userService = userService;
         this.customerService = customerService;
         this.accountService = accountService;
-        this.customerAccountService = customerAccountService;
         this.transactionService = transactionService;
         this.cardService = cardService;
     }
 
     public void initialize() {
-        UserDTO admin = UserDTO.builder()
+        // Создаем пользователей
+        User admin = User.builder()
                 .username("admin")
                 .password("admin123")
-                .role(String.valueOf(Role.ADMIN))
+                .role(Role.ADMIN)
                 .build();
 
-        UserDTO customer = UserDTO.builder()
+        User customerUser = User.builder()
                 .username("customer")
                 .password("cust123")
-                .role(String.valueOf(Role.CUSTOMER))
+                .role(Role.CUSTOMER)
                 .build();
 
         admin = userService.create(admin);
-        customer = userService.create(customer);
+        customerUser = userService.create(customerUser);
 
-        CustomerDTO customer1 = CustomerDTO.builder()
+        // Создаем клиента
+        Customer customer = Customer.builder()
                 .firstName("John")
                 .lastName("Doe")
                 .email("john.doe@example.com")
@@ -58,47 +57,56 @@ public class MockDataInitializer {
                 .state("NY")
                 .postalCode("10001")
                 .country("USA")
-                .userId(customer.getId())
+                .createdAt(LocalDateTime.now())
+                .user(customerUser)
                 .build();
 
-        customer1 = customerService.create(customer1);
+        customer = customerService.create(customer);
 
-        AccountDTO account1 = AccountDTO.builder()
+        // Создаем банковский счет
+        Account account = Account.builder()
                 .accountNumber("123456789")
                 .accountType("SAVINGS")
                 .balance(new BigDecimal("1000.00"))
                 .currency("USD")
                 .iban("US12345678901234567890")
+                .createdAt(LocalDateTime.now())
                 .build();
 
-        account1 = accountService.create(account1);
+        account = accountService.create(account);
 
-        CustomerAccountDTO customerAccount1 = CustomerAccountDTO.builder()
-                .customerId(customer1.getId())
-                .accountId(account1.getId())
-                .build();
+        // Связываем счет с клиентом
+        customer.getAccounts().add(account);
+        customerService.update(customer);
 
-        customerAccountService.create(customerAccount1);
-
-        TransactionDTO transaction1 = TransactionDTO.builder()
+        // Создаем транзакцию
+        Transaction transaction = Transaction.builder()
                 .amount(new BigDecimal("200.00"))
                 .transactionDate(LocalDateTime.now())
-                .sourceAccountId(account1.getId())
-                .destinationAccountId(account1.getId())
+                .sourceAccount(account)
+                .destinationAccount(account)
                 .currency("USD")
                 .build();
 
-        transactionService.create(transaction1);
+        transactionService.create(transaction);
 
-        CardDTO card1 = CardDTO.builder()
-                .accountId(account1.getId())
-                .customerId(customer1.getId())
+        // Создаем карту
+        Card card = Card.builder()
+                .account(account)
+                .customer(customer)
                 .cardNumber("1234-5678-9012-3456")
                 .cardType("VISA")
                 .expirationDate(LocalDate.now().plusYears(2))
                 .cvv("123")
+                .createdAt(LocalDateTime.now())
                 .build();
 
-        cardService.create(card1);
+        cardService.create(card);
+
+        // Добавляем карту в аккаунт
+        account.getCards().add(card);
+        accountService.update(account);
+
+        System.out.println("Mock data initialized successfully!");
     }
 }

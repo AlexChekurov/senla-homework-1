@@ -14,21 +14,19 @@
   </properties>
 
   <dependencies>
-    <!-- Spring Core -->
+
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-core</artifactId>
       <version>6.1.12</version>
     </dependency>
 
-    <!-- Spring Context -->
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
       <version>6.1.12</version>
     </dependency>
 
-    <!-- Lombok -->
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
@@ -36,14 +34,12 @@
       <scope>provided</scope>
     </dependency>
 
-    <!-- Liquibase -->
     <dependency>
       <groupId>org.liquibase</groupId>
       <artifactId>liquibase-core</artifactId>
       <version>4.5.0</version>
     </dependency>
 
-    <!-- PostgreSQL Driver -->
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>

@@ -1,7 +1,9 @@
 package com.alex.homework4example.controller;
 
 import com.alex.homework4example.dto.CustomerDTO;
-import com.alex.homework4example.service.impl.CustomerService;
+import com.alex.homework4example.entity.Customer;
+import com.alex.homework4example.mapper.impl.CustomerMapper;
+import com.alex.homework4example.service.impl.CustomerServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,17 +12,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class CustomerController {
 
-    private final CustomerService customerService;
+    private final CustomerServiceImpl customerService;
+    private final CustomerMapper customerMapper;
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public CustomerController(CustomerService customerService, ObjectMapper objectMapper) {
+    public CustomerController(CustomerServiceImpl customerService, CustomerMapper customerMapper, ObjectMapper objectMapper) {
         this.customerService = customerService;
+        this.customerMapper = customerMapper;
         this.objectMapper = objectMapper;
     }
 
-    public void initializeAndPerformOperations() throws JsonProcessingException {
-        CustomerDTO customer1 = CustomerDTO.builder()
+    public void createCustomers() throws JsonProcessingException {
+        CustomerDTO customer1DTO = CustomerDTO.builder()
                 .firstName("John")
                 .lastName("Doe")
                 .email("john.doe@example.com")
@@ -30,10 +34,10 @@ public class CustomerController {
                 .state("NY")
                 .postalCode("10001")
                 .country("USA")
-                .userId(1)
+                .userId(1L)
                 .build();
 
-        CustomerDTO customer2 = CustomerDTO.builder()
+        CustomerDTO customer2DTO = CustomerDTO.builder()
                 .firstName("Jane")
                 .lastName("Smith")
                 .email("jane.smith@example.com")
@@ -43,31 +47,53 @@ public class CustomerController {
                 .state("CA")
                 .postalCode("90001")
                 .country("USA")
-                .userId(2)
+                .userId(2L)
                 .build();
 
-        CustomerDTO createdCustomer1 = customerService.create(customer1);
-        CustomerDTO createdCustomer2 = customerService.create(customer2);
+        Customer customer1 = customerMapper.toEntity(customer1DTO);
+        Customer customer2 = customerMapper.toEntity(customer2DTO);
 
-        System.out.println("Retrieved Customer 1: " + objectMapper.writeValueAsString(customerService.findById(createdCustomer1.getId()).orElseThrow()));
+        customerService.create(customer1);
+        customerService.create(customer2);
 
-        customerService.delete(createdCustomer2.getId());
+        System.out.println("Created Customer 1: " + objectMapper.writeValueAsString(customerMapper.toDto(customer1)));
+        System.out.println("Created Customer 2: " + objectMapper.writeValueAsString(customerMapper.toDto(customer2)));
+    }
 
-        CustomerDTO updatedCustomer1 = CustomerDTO.builder()
-                .id(createdCustomer1.getId())
+    public void readCustomer(Long id) throws JsonProcessingException {
+        Customer customer = customerService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        CustomerDTO customerDTO = customerMapper.toDto(customer);
+        System.out.println("Retrieved Customer: " + objectMapper.writeValueAsString(customerDTO));
+    }
+
+    public void updateCustomer(Long id) throws JsonProcessingException {
+        Customer customer = customerService.findById(id)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        CustomerDTO updatedCustomerDTO = CustomerDTO.builder()
+                .id(customer.getId())
                 .firstName("UpdatedJohn")
-                .lastName(createdCustomer1.getLastName())
-                .email(createdCustomer1.getEmail())
-                .phone(createdCustomer1.getPhone())
-                .street(createdCustomer1.getStreet())
-                .city(createdCustomer1.getCity())
-                .state(createdCustomer1.getState())
-                .postalCode(createdCustomer1.getPostalCode())
-                .country(createdCustomer1.getCountry())
-                .userId(createdCustomer1.getUserId())
+                .lastName(customer.getLastName())
+                .email(customer.getEmail())
+                .phone(customer.getPhone())
+                .street(customer.getStreet())
+                .city(customer.getCity())
+                .state(customer.getState())
+                .postalCode(customer.getPostalCode())
+                .country(customer.getCountry())
+                .userId(customer.getUser().getId())
                 .build();
-        customerService.update(updatedCustomer1);
 
-        System.out.println("Updated Customer 1: " + objectMapper.writeValueAsString(customerService.findById(updatedCustomer1.getId()).orElseThrow()));
+        Customer updatedCustomer = customerMapper.toEntity(updatedCustomerDTO);
+        customerService.update(updatedCustomer);
+
+        System.out.println("Updated Customer: " + objectMapper.writeValueAsString(customerMapper.toDto(updatedCustomer)));
+    }
+
+    public void deleteCustomer(Long id) {
+        customerService.delete(id);
+        System.out.println("Deleted Customer with ID: " + id);
     }
 }

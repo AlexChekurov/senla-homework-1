@@ -14,7 +14,6 @@ public class UserMapper implements Mapper<User, UserDTO> {
         return UserDTO.builder()
                 .id(user.getId())
                 .username(user.getUsername())
-                .password(user.getPassword())
                 .role(String.valueOf(user.getRole()))
                 .build();
     }
@@ -24,7 +23,6 @@ public class UserMapper implements Mapper<User, UserDTO> {
         return User.builder()
                 .id(userDTO.getId())
                 .username(userDTO.getUsername())
-                .password(userDTO.getPassword())
                 .role(Role.valueOf(userDTO.getRole()))
                 .build();
     }

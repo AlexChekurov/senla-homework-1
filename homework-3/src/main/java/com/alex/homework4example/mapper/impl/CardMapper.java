@@ -6,6 +6,7 @@ import com.alex.homework4example.entity.Customer;
 import com.alex.homework4example.entity.Account;
 import com.alex.homework4example.dao.impl.CustomerDao;
 import com.alex.homework4example.dao.impl.AccountDao;
+import com.alex.homework4example.exception.EntityNotFoundException;
 import com.alex.homework4example.mapper.Mapper;
 import org.springframework.stereotype.Component;
 
@@ -36,8 +37,12 @@ public class CardMapper implements Mapper<Card, CardDTO> {
 
     @Override
     public Card toEntity(CardDTO cardDTO) {
-        Customer customer = customerDao.findById(cardDTO.getCustomerId()).orElseThrow();
-        Account account = accountDao.findById(cardDTO.getAccountId()).orElseThrow();
+        Customer customer = customerDao.findById(cardDTO.getCustomerId())
+                .orElseThrow(() -> new EntityNotFoundException("Customer with ID " + cardDTO.getCustomerId() + " not found"));
+
+        Account account = accountDao.findById(cardDTO.getAccountId())
+                .orElseThrow(() -> new EntityNotFoundException("Account with ID " + cardDTO.getAccountId() + " not found"));
+
         return Card.builder()
                 .id(cardDTO.getId())
                 .account(account)

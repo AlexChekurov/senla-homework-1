@@ -6,8 +6,7 @@ import lombok.Value;
 @Value
 @Builder
 public class UserDTO {
-    Integer id;
+    Long id;
     String username;
-    String password;
     String role;
 }

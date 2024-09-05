@@ -5,6 +5,8 @@ import lombok.Value;
 
 @Value
 @Builder
-public class RoleDTO {
-    String name;  // ADMIN, EMPLOYEE, CUSTOMER
+public class UserCreateDTO {
+    String username;
+    String password;
+    String role;
 }

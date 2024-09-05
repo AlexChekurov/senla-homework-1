@@ -9,10 +9,10 @@ import java.time.LocalDateTime;
 @Value
 @Builder
 public class TransactionDTO {
-    Integer id;
+    Long id;
     BigDecimal amount;
     LocalDateTime transactionDate;
-    Integer sourceAccountId;
-    Integer destinationAccountId;
+    Long sourceAccountId;
+    Long destinationAccountId;
     String currency;
 }

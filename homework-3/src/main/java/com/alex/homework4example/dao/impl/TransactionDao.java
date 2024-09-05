@@ -4,25 +4,25 @@ import com.alex.homework4example.dao.AbstractDao;
 import com.alex.homework4example.entity.Transaction;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Component
-public class TransactionDao extends AbstractDao<Integer, Transaction> {
+public class TransactionDao extends AbstractDao<Long, Transaction> {
 
-    private final static AtomicInteger idCounter = new AtomicInteger(0);
+    private final static AtomicLong idCounter = new AtomicLong(0);
 
     @Override
-    protected Integer generateId() {
+    protected Long generateId() {
         return idCounter.incrementAndGet();
     }
 
     @Override
-    protected Integer getId(Transaction transaction) {
-        return transaction.getId();
+    protected Long getId(Transaction transaction) {
+        return transaction.getId() != null ? transaction.getId() : null;
     }
 
     @Override
-    protected void setId(Transaction transaction, Integer id) {
+    protected void setId(Transaction transaction, Long id) {
         transaction.setId(id);
     }
 }

@@ -9,9 +9,9 @@ import java.time.LocalDateTime;
 @Value
 @Builder
 public class CardDTO {
-    Integer id;
-    Integer accountId;
-    Integer customerId;
+    Long id;
+    Long accountId;   // Ссылка на Account через ID
+    Long customerId;  // Ссылка на Customer через ID
     String cardNumber;
     String cardType;
     LocalDate expirationDate;

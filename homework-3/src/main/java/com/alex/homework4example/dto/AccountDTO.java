@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Value
 @Builder
 public class AccountDTO {
-    Integer id;
+    Long id;
     String accountNumber;
     String accountType;
     BigDecimal balance;

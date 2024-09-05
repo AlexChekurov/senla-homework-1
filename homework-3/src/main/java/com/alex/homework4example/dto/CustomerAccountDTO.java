@@ -6,7 +6,7 @@ import lombok.Value;
 @Value
 @Builder
 public class CustomerAccountDTO {
-    Integer id;
-    Integer customerId;
-    Integer accountId;
+    Long id;
+    Long customerId;
+    Long accountId;
 }

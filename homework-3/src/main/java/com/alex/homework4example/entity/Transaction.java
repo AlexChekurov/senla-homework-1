@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class Transaction {
-    private Integer id;
+    private Long id;
     private BigDecimal amount;
     private LocalDateTime transactionDate;
     private Account sourceAccount;

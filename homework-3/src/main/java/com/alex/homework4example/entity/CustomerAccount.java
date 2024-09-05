@@ -7,7 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class CustomerAccount {
-    private Integer id;
+    private Long id;
     private Customer customer;
     private Account account;
 }
