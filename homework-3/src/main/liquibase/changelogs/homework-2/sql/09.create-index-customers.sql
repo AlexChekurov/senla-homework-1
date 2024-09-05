@@ -1,0 +1,1 @@
+CREATE INDEX idx_customers_user_id ON banking.customers(user_id);
