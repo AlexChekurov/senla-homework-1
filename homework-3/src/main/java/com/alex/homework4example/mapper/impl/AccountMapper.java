@@ -5,6 +5,8 @@ import com.alex.homework4example.entity.Account;
 import com.alex.homework4example.mapper.Mapper;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+
 @Component
 public class AccountMapper implements Mapper<Account, AccountDTO> {
 
@@ -17,7 +19,7 @@ public class AccountMapper implements Mapper<Account, AccountDTO> {
                 .balance(account.getBalance())
                 .currency(account.getCurrency())
                 .iban(account.getIban())
-                .createdAt(account.getCreatedAt())
+                .createdAt(account.getCreatedAt() != null ? account.getCreatedAt() : LocalDateTime.now()) // Ensure non-null
                 .build();
     }
 
@@ -30,7 +32,7 @@ public class AccountMapper implements Mapper<Account, AccountDTO> {
                 .balance(accountDTO.getBalance())
                 .currency(accountDTO.getCurrency())
                 .iban(accountDTO.getIban())
-                .createdAt(accountDTO.getCreatedAt())
+                .createdAt(accountDTO.getCreatedAt() != null ? accountDTO.getCreatedAt() : LocalDateTime.now()) // Set current time if null
                 .build();
     }
 }

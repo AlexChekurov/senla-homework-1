@@ -1,77 +1,64 @@
 package com.alex.homework4example;
 
 import com.alex.homework4example.config.AppConfig;
-import com.alex.homework4example.controller.*;
+import com.alex.homework4example.controller.AccountController;
+import com.alex.homework4example.entity.Account;
+import com.alex.homework4example.exception.EntityNotFoundException;
+import com.alex.homework4example.exception.InsufficientFundsException;
+import com.alex.homework4example.service.impl.AccountServiceImpl;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 public class Application {
     public static void main(String[] args) {
         try (AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AppConfig.class)) {
-            UserController userController = context.getBean(UserController.class);
-            CustomerController customerController = context.getBean(CustomerController.class);
+            AccountServiceImpl accountService = context.getBean(AccountServiceImpl.class);
             AccountController accountController = context.getBean(AccountController.class);
-            CardController cardController = context.getBean(CardController.class);
-            TransactionController transactionController = context.getBean(TransactionController.class);
 
-            // Операции с пользователями
-            System.out.println("Creating Users...");
-            userController.createUsers();
+            // Создание двух аккаунтов для перевода
+            System.out.println("Создание аккаунтов...");
+            List<Account> accounts = accountController.createAccounts();
 
-            System.out.println("\nReading User 1...");
-            userController.readUser(1L);
+            Account account1 = accounts.get(0);
+            Account account2 = accounts.get(1);
 
-            System.out.println("\nUpdating User 1...");
-            userController.updateUser(1L);
+            System.out.println("\nБаланс до перевода:");
+            System.out.println("Баланс счета отправителя: " + account1.getBalance());
+            System.out.println("Баланс счета получателя: " + account2.getBalance());
 
-            // Операции с клиентами
-            System.out.println("\nCreating Customers...");
-            customerController.createCustomers();
+            // Выполняем перевод средств
+            System.out.println("\nПеревод 500.00 от счета 1 к счету 2...");
+            accountService.transferMoney(account1, account2, new BigDecimal("500.00"));
 
-            System.out.println("\nReading Customer 1...");
-            customerController.readCustomer(1L);
+            // Получаем обновленные данные аккаунтов
+            Account fromAccount = accountService.findById(account1.getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Счет отправителя не найден"));
+            Account toAccount = accountService.findById(account2.getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Счет получателя не найден"));
 
-            System.out.println("\nUpdating Customer 1...");
-            customerController.updateCustomer(1L);
+            System.out.println("\nБаланс после успешного перевода:");
+            System.out.println("Баланс счета отправителя: " + fromAccount.getBalance());
+            System.out.println("Баланс счета получателя: " + toAccount.getBalance());
 
-            // Операции с аккаунтами
-            System.out.println("\nCreating Accounts...");
-            accountController.createAccounts();
+            // Попытка перевести сумму, превышающую баланс
+            try {
+                System.out.println("\nПопытка перевода 2000.00 от счета 1 к счету 2...");
+                accountService.transferMoney(fromAccount, toAccount, new BigDecimal("2000.00"));
+            } catch (InsufficientFundsException e) {
+                System.out.println("Перевод не выполнен: " + e.getMessage());
+            }
 
-            System.out.println("\nReading Account 1...");
-            accountController.readAccount(1L);
+            // Проверяем балансы после неудачного перевода
+            fromAccount = accountService.findById(account1.getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Счет отправителя не найден"));
+            toAccount = accountService.findById(account2.getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Счет получателя не найден"));
 
-            System.out.println("\nUpdating Account 1...");
-            accountController.updateAccount(1L);
-
-            // Операции с картами
-            System.out.println("\nCreating Cards...");
-            cardController.createCards();
-
-            System.out.println("\nReading Card 1...");
-            cardController.readCard(1L);
-
-            System.out.println("\nUpdating Card 1...");
-            cardController.updateCard(1L);
-
-            System.out.println("\nDeleting Card 2...");
-            cardController.deleteCard(2L);
-
-            // Операции с транзакциями
-            System.out.println("\nCreating Transactions...");
-            transactionController.createTransactions();
-
-            System.out.println("\nReading Transaction 1...");
-            transactionController.readTransaction(1L);
-
-            System.out.println("\nUpdating Transaction 1...");
-            transactionController.updateTransaction(1L);
-
-            System.out.println("\nDeleting Transaction 2...");
-            transactionController.deleteTransaction(2L);
-
-            // Только после всех операций с картами и транзакциями удаляем клиента 2
-            System.out.println("\nDeleting Customer 2...");
-            customerController.deleteCustomer(2L);
+            System.out.println("\nБаланс после неудачного перевода:");
+            System.out.println("Баланс счета отправителя: " + fromAccount.getBalance());
+            System.out.println("Баланс счета получателя: " + toAccount.getBalance());
 
         } catch (Exception e) {
             e.printStackTrace();

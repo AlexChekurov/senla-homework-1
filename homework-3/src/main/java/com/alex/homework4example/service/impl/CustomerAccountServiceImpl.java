@@ -1,27 +1,24 @@
 package com.alex.homework4example.service.impl;
 
-import com.alex.homework4example.dao.impl.CustomerAccountDao;
+import com.alex.homework4example.dao.Dao;
+import com.alex.homework4example.dao.jdbc.impl.JdbcCustomerAccountDao;
 import com.alex.homework4example.entity.CustomerAccount;
-import com.alex.homework4example.service.CustomerAccountService;
 import com.alex.homework4example.service.AbstractCrudService;
+import com.alex.homework4example.service.CustomerAccountService;
+import com.alex.homework4example.utils.ConnectionHolder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CustomerAccountServiceImpl extends AbstractCrudService<CustomerAccount> implements CustomerAccountService {
 
-    private final CustomerAccountDao customerAccountDao;
+    private final JdbcCustomerAccountDao jdbcCustomerAccountDao;
 
-    public CustomerAccountServiceImpl(CustomerAccountDao customerAccountDao) {
-        this.customerAccountDao = customerAccountDao;
+    public CustomerAccountServiceImpl(ConnectionHolder connectionHolder) {
+        this.jdbcCustomerAccountDao = new JdbcCustomerAccountDao(connectionHolder);
     }
 
     @Override
-    protected CustomerAccountDao getDao() {
-        return customerAccountDao;
-    }
-
-    @Override
-    protected Long getEntityId(CustomerAccount customerAccount) {
-        return customerAccount.getId() != null ? customerAccount.getId() : null;
+    protected Dao<Long, CustomerAccount> getDao() {
+        return jdbcCustomerAccountDao;
     }
 }

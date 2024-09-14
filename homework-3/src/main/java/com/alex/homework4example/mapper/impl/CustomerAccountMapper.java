@@ -4,8 +4,8 @@ import com.alex.homework4example.dto.CustomerAccountDTO;
 import com.alex.homework4example.entity.CustomerAccount;
 import com.alex.homework4example.entity.Customer;
 import com.alex.homework4example.entity.Account;
-import com.alex.homework4example.dao.impl.CustomerDao;
-import com.alex.homework4example.dao.impl.AccountDao;
+import com.alex.homework4example.dao.jdbc.impl.JdbcCustomerDao;
+import com.alex.homework4example.dao.jdbc.impl.JdbcAccountDao;
 import com.alex.homework4example.exception.EntityNotFoundException;
 import com.alex.homework4example.mapper.Mapper;
 import org.springframework.stereotype.Component;
@@ -13,12 +13,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class CustomerAccountMapper implements Mapper<CustomerAccount, CustomerAccountDTO> {
 
-    private final CustomerDao customerDao;
-    private final AccountDao accountDao;
+    private final JdbcCustomerDao jdbcCustomerDao;
+    private final JdbcAccountDao jdbcAccountDao;
 
-    public CustomerAccountMapper(CustomerDao customerDao, AccountDao accountDao) {
-        this.customerDao = customerDao;
-        this.accountDao = accountDao;
+    public CustomerAccountMapper(JdbcCustomerDao jdbcCustomerDao, JdbcAccountDao jdbcAccountDao) {
+        this.jdbcCustomerDao = jdbcCustomerDao;
+        this.jdbcAccountDao = jdbcAccountDao;
     }
 
     @Override
@@ -32,10 +32,10 @@ public class CustomerAccountMapper implements Mapper<CustomerAccount, CustomerAc
 
     @Override
     public CustomerAccount toEntity(CustomerAccountDTO customerAccountDTO) {
-        Customer customer = customerDao.findById(customerAccountDTO.getCustomerId())
+        Customer customer = jdbcCustomerDao.findById(customerAccountDTO.getCustomerId())
                 .orElseThrow(() -> new EntityNotFoundException("Customer with ID " + customerAccountDTO.getCustomerId() + " not found"));
 
-        Account account = accountDao.findById(customerAccountDTO.getAccountId())
+        Account account = jdbcAccountDao.findById(customerAccountDTO.getAccountId())
                 .orElseThrow(() -> new EntityNotFoundException("Account with ID " + customerAccountDTO.getAccountId() + " not found"));
 
         return CustomerAccount.builder()

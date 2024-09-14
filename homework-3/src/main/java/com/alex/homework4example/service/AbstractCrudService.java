@@ -1,6 +1,8 @@
 package com.alex.homework4example.service;
 
 import com.alex.homework4example.dao.Dao;
+import com.alex.homework4example.exception.DataAccessException;
+import com.alex.homework4example.exception.EntityNotFoundException;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,39 +22,57 @@ public abstract class AbstractCrudService<Entity> implements CrudService<Entity>
 
     @Override
     public Entity create(Entity entity) {
-        beforeCreate(entity);
-        getDao().save(entity);
-        afterCreate(entity);
-        return entity;
+        try {
+            beforeCreate(entity);
+            getDao().save(entity);
+            afterCreate(entity);
+            return entity;
+        } catch (Exception e) {
+            throw new DataAccessException("Error creating entity", e);
+        }
     }
 
     @Override
     public Optional<Entity> findById(Long id) {
-        return getDao().findById(id);
+        try {
+            return getDao().findById(id);
+        } catch (Exception e) {
+            throw new DataAccessException("Error finding entity by id", e);
+        }
     }
 
     @Override
     public List<Entity> findAll() {
-        return getDao().findAll();
+        try {
+            return getDao().findAll();
+        } catch (Exception e) {
+            throw new DataAccessException("Error finding all entities", e);
+        }
     }
 
     @Override
     public Entity update(Entity entity) {
-        beforeUpdate(entity);
-        if (getDao().update(entity)) {
-            afterUpdate(entity);
-            return entity;
+        try {
+            beforeUpdate(entity);
+            if (getDao().update(entity)) {
+                afterUpdate(entity);
+                return entity;
+            }
+            throw new EntityNotFoundException("Entity not found");
+        } catch (Exception e) {
+            throw new DataAccessException("Error updating entity", e);
         }
-        throw new RuntimeException("Entity not found with id: " + getEntityId(entity));
     }
 
     @Override
     public boolean delete(Long id) {
-        beforeDelete(id);
-        boolean result = getDao().delete(id);
-        afterDelete(id);
-        return result;
+        try {
+            beforeDelete(id);
+            boolean result = getDao().delete(id);
+            afterDelete(id);
+            return result;
+        } catch (Exception e) {
+            throw new DataAccessException("Error deleting entity", e);
+        }
     }
-
-    protected abstract Long getEntityId(Entity entity);
 }

@@ -1,6 +1,6 @@
 CREATE TABLE banking.customers
 (
-    id          SERIAL PRIMARY KEY,
+    id          BIGSERIAL PRIMARY KEY,
     first_name  VARCHAR(50)       NOT NULL,
     last_name   VARCHAR(50)       NOT NULL,
     email       VARCHAR(100) UNIQUE NOT NULL,
@@ -11,6 +11,6 @@ CREATE TABLE banking.customers
     postal_code VARCHAR(20)       NOT NULL,
     country     VARCHAR(50)       NOT NULL,
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    user_id     INT               NOT NULL,
+    user_id     BIGINT            NOT NULL,
     FOREIGN KEY (user_id) REFERENCES banking.users (id)
 );

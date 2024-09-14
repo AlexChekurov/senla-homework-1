@@ -3,7 +3,7 @@ package com.alex.homework4example.mapper.impl;
 import com.alex.homework4example.dto.TransactionDTO;
 import com.alex.homework4example.entity.Transaction;
 import com.alex.homework4example.entity.Account;
-import com.alex.homework4example.dao.impl.AccountDao;
+import com.alex.homework4example.dao.jdbc.impl.JdbcAccountDao;
 import com.alex.homework4example.exception.EntityNotFoundException;
 import com.alex.homework4example.mapper.Mapper;
 import org.springframework.stereotype.Component;
@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class TransactionMapper implements Mapper<Transaction, TransactionDTO> {
 
-    private final AccountDao accountDao;
+    private final JdbcAccountDao jdbcAccountDao;
 
-    public TransactionMapper(AccountDao accountDao) {
-        this.accountDao = accountDao;
+    public TransactionMapper(JdbcAccountDao jdbcAccountDao) {
+        this.jdbcAccountDao = jdbcAccountDao;
     }
 
     @Override
@@ -31,10 +31,10 @@ public class TransactionMapper implements Mapper<Transaction, TransactionDTO> {
 
     @Override
     public Transaction toEntity(TransactionDTO transactionDTO) {
-        Account sourceAccount = accountDao.findById(transactionDTO.getSourceAccountId())
+        Account sourceAccount = jdbcAccountDao.findById(transactionDTO.getSourceAccountId())
                 .orElseThrow(() -> new EntityNotFoundException("Source account with ID " + transactionDTO.getSourceAccountId() + " not found"));
 
-        Account destinationAccount = accountDao.findById(transactionDTO.getDestinationAccountId())
+        Account destinationAccount = jdbcAccountDao.findById(transactionDTO.getDestinationAccountId())
                 .orElseThrow(() -> new EntityNotFoundException("Destination account with ID " + transactionDTO.getDestinationAccountId() + " not found"));
 
         return Transaction.builder()

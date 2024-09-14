@@ -9,6 +9,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+
 @Component
 public class AccountController {
 
@@ -23,7 +27,7 @@ public class AccountController {
         this.objectMapper = objectMapper;
     }
 
-    public void createAccounts() throws JsonProcessingException {
+    public List<Account> createAccounts() throws JsonProcessingException {
         AccountDTO account1DTO = AccountDTO.builder()
                 .accountNumber("111222333")
                 .accountType("SAVINGS")
@@ -48,7 +52,10 @@ public class AccountController {
 
         System.out.println("Created Account 1: " + objectMapper.writeValueAsString(accountMapper.toDto(account1)));
         System.out.println("Created Account 2: " + objectMapper.writeValueAsString(accountMapper.toDto(account2)));
+
+        return Arrays.asList(account1, account2);
     }
+
 
     public void readAccount(Long id) throws JsonProcessingException {
         Account account = accountService.findById(id)

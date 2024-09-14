@@ -4,8 +4,8 @@ import com.alex.homework4example.dto.CardDTO;
 import com.alex.homework4example.entity.Card;
 import com.alex.homework4example.entity.Customer;
 import com.alex.homework4example.entity.Account;
-import com.alex.homework4example.dao.impl.CustomerDao;
-import com.alex.homework4example.dao.impl.AccountDao;
+import com.alex.homework4example.dao.jdbc.impl.JdbcCustomerDao;
+import com.alex.homework4example.dao.jdbc.impl.JdbcAccountDao;
 import com.alex.homework4example.exception.EntityNotFoundException;
 import com.alex.homework4example.mapper.Mapper;
 import org.springframework.stereotype.Component;
@@ -13,12 +13,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class CardMapper implements Mapper<Card, CardDTO> {
 
-    private final CustomerDao customerDao;
-    private final AccountDao accountDao;
+    private final JdbcCustomerDao jdbcCustomerDao;
+    private final JdbcAccountDao jdbcAccountDao;
 
-    public CardMapper(CustomerDao customerDao, AccountDao accountDao) {
-        this.customerDao = customerDao;
-        this.accountDao = accountDao;
+    public CardMapper(JdbcCustomerDao jdbcCustomerDao, JdbcAccountDao jdbcAccountDao) {
+        this.jdbcCustomerDao = jdbcCustomerDao;
+        this.jdbcAccountDao = jdbcAccountDao;
     }
 
     @Override
@@ -37,10 +37,10 @@ public class CardMapper implements Mapper<Card, CardDTO> {
 
     @Override
     public Card toEntity(CardDTO cardDTO) {
-        Customer customer = customerDao.findById(cardDTO.getCustomerId())
+        Customer customer = jdbcCustomerDao.findById(cardDTO.getCustomerId())
                 .orElseThrow(() -> new EntityNotFoundException("Customer with ID " + cardDTO.getCustomerId() + " not found"));
 
-        Account account = accountDao.findById(cardDTO.getAccountId())
+        Account account = jdbcAccountDao.findById(cardDTO.getAccountId())
                 .orElseThrow(() -> new EntityNotFoundException("Account with ID " + cardDTO.getAccountId() + " not found"));
 
         return Card.builder()

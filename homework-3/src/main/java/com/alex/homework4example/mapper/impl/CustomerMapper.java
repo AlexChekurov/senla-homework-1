@@ -3,7 +3,7 @@ package com.alex.homework4example.mapper.impl;
 import com.alex.homework4example.dto.CustomerDTO;
 import com.alex.homework4example.entity.Customer;
 import com.alex.homework4example.entity.User;
-import com.alex.homework4example.dao.impl.UserDao;
+import com.alex.homework4example.dao.jdbc.impl.JdbcUserDao;
 import com.alex.homework4example.exception.EntityNotFoundException;
 import com.alex.homework4example.mapper.Mapper;
 import org.springframework.stereotype.Component;
@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class CustomerMapper implements Mapper<Customer, CustomerDTO> {
 
-    private final UserDao userDao;
+    private final JdbcUserDao jdbcUserDao;
 
-    public CustomerMapper(UserDao userDao) {
-        this.userDao = userDao;
+    public CustomerMapper(JdbcUserDao jdbcUserDao) {
+        this.jdbcUserDao = jdbcUserDao;
     }
 
     @Override
@@ -37,7 +37,7 @@ public class CustomerMapper implements Mapper<Customer, CustomerDTO> {
 
     @Override
     public Customer toEntity(CustomerDTO customerDTO) {
-        User user = userDao.findById(customerDTO.getUserId())
+        User user = jdbcUserDao.findById(customerDTO.getUserId())
                 .orElseThrow(() -> new EntityNotFoundException("User with ID " + customerDTO.getUserId() + " not found"));
 
         return Customer.builder()

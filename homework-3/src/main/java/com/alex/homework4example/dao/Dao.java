@@ -3,10 +3,10 @@ package com.alex.homework4example.dao;
 import java.util.List;
 import java.util.Optional;
 
-public interface Dao<K, E> {
-    E save(E e);
-    Optional<E> findById(K id);
-    List<E> findAll();
-    boolean update(E e);
-    boolean delete(K id);
+public interface Dao<Id, Entity> {
+    Entity save(Entity entity);
+    Optional<Entity> findById(Id id);
+    List<Entity> findAll();
+    boolean update(Entity entity);
+    boolean delete(Id id);
 }
