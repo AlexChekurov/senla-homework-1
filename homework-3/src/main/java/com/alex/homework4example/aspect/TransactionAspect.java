@@ -25,27 +25,22 @@ public class TransactionAspect {
                            joinPoint.getTarget().getClass().getName() + "." + joinPoint.getSignature().getName());
         Connection connection = null;
         try {
-            // Получаем транзакционное соединение
-            connection = connectionHolder.getConnection(true); // передаем true для транзакционного соединения
-            connection.setAutoCommit(false); // Начинаем транзакцию
+            connection = connectionHolder.getConnection(true);
+            connection.setAutoCommit(false);
 
-            // Выполняем метод
             Object result = joinPoint.proceed();
 
-            // Коммитим изменения в случае успешного выполнения
             connectionHolder.commitTransaction();
             return result;
 
         } catch (Throwable throwable) {
             if (connection != null) {
-                // Если произошла ошибка, откатываем транзакцию
                 connectionHolder.rollbackTransaction();
             }
             throw throwable;
         } finally {
             if (connection != null) {
-                // Закрываем все соединения после выполнения метода
-                connectionHolder.closeConnections(); // Закрытие всех активных соединений
+                connectionHolder.returnConnectionToPool(connection);
             }
         }
     }

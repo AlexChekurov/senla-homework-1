@@ -6,14 +6,14 @@ import org.springframework.stereotype.Component;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Component
 public class ConnectionHolder {
 
     private final ThreadLocal<Connection> transactionConnections = new ThreadLocal<>();
-    private final Map<Long, Connection> openConnections = new ConcurrentHashMap<>();
+    private final Queue<Connection> connectionPool = new ConcurrentLinkedQueue<>();
 
     @Value("${spring.datasource.url}")
     private String dbUrl;
@@ -24,7 +24,19 @@ public class ConnectionHolder {
     @Value("${spring.datasource.password}")
     private String dbPassword;
 
-    // Получаем connection из пула или открываем новый
+    @Value("${connection.pool.size:10}")
+    private int poolSize;
+
+    public ConnectionHolder() throws SQLException {
+        initializeConnectionPool();
+    }
+
+    private void initializeConnectionPool() throws SQLException {
+        for (int i = 0; i < poolSize; i++) {
+            connectionPool.add(createNewConnection());
+        }
+    }
+
     public Connection getConnection(boolean transactional) throws SQLException {
         if (transactional) {
             return getTransactionalConnection();
@@ -35,20 +47,21 @@ public class ConnectionHolder {
 
     private Connection getTransactionalConnection() throws SQLException {
         Connection connection = transactionConnections.get();
-        if (connection == null || connection.isClosed()) {
+        if (connection == null) {
             connection = createNewConnection();
             connection.setAutoCommit(false);
             transactionConnections.set(connection);
+        }
+        if (connection.isClosed()) {
+            throw new SQLException("Транзакционное соединение закрыто");
         }
         return connection;
     }
 
     private Connection getNonTransactionalConnection() throws SQLException {
-        long threadId = Thread.currentThread().getId();
-        Connection connection = openConnections.get(threadId);
+        Connection connection = connectionPool.poll();
         if (connection == null || connection.isClosed()) {
             connection = createNewConnection();
-            openConnections.put(threadId, connection);
         }
         return connection;
     }
@@ -57,17 +70,14 @@ public class ConnectionHolder {
         return DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
     }
 
-    // Закрытие всех открытых connection при завершении работы
     public void closeConnections() throws SQLException {
-        for (Connection connection : openConnections.values()) {
+        for (Connection connection : connectionPool) {
             if (connection != null && !connection.isClosed()) {
                 connection.close();
             }
         }
-        openConnections.clear();
     }
 
-    // Коммит транзакции
     public void commitTransaction() throws SQLException {
         Connection connection = transactionConnections.get();
         if (connection != null && !connection.isClosed()) {
@@ -77,13 +87,18 @@ public class ConnectionHolder {
         }
     }
 
-    // Rollback транзакции
     public void rollbackTransaction() throws SQLException {
         Connection connection = transactionConnections.get();
         if (connection != null && !connection.isClosed()) {
             connection.rollback();
             connection.close();
             transactionConnections.remove();
+        }
+    }
+
+    public void returnConnectionToPool(Connection connection) {
+        if (connection != null) {
+            connectionPool.add(connection);
         }
     }
 }
