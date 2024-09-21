@@ -4,68 +4,45 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ee675f5d-6c32-4546-8236-c17c15e98264" name="Changes" comment="" />
+    <list default="true" id="b6462f66-548a-4a6f-9502-dea546df7da5" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/generated-sources/annotations/com/alex/homework4example/mapper/AccountMapperImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/target/generated-sources/annotations/com/alex/homework4example/mapper/AccountMapperImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/generated-sources/annotations/com/alex/homework4example/mapper/CustomerMapperImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/target/generated-sources/annotations/com/alex/homework4example/mapper/CustomerMapperImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/generated-sources/annotations/com/alex/homework4example/mapper/UserMapperImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/target/generated-sources/annotations/com/alex/homework4example/mapper/UserMapperImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/senla-homework-1.0-SNAPSHOT.jar" beforeDir="false" afterPath="$PROJECT_DIR$/target/senla-homework-1.0-SNAPSHOT.jar" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="Interface" />
-        <option value="AnnotationType" />
-        <option value="Class" />
-      </list>
-    </option>
-  </component>
   <component name="Git.Settings">
-    <option name="RECENT_BRANCH_BY_REPOSITORY">
-      <map>
-        <entry key="$PROJECT_DIR$/.." value="homework-4-spring-ioc" />
-      </map>
-    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
-  <component name="GitHubPullRequestSearchHistory">{
-  &quot;lastFilter&quot;: {
-    &quot;state&quot;: &quot;OPEN&quot;,
-    &quot;assignee&quot;: &quot;AlexChekurov&quot;
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "AlexChekurov"
   }
-}</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/AlexChekurov/senla-homework-1.git&quot;,
-    &quot;accountId&quot;: &quot;0c2b679b-9f82-43fe-b777-d8effb4854be&quot;
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/AlexChekurov/senla-homework-1.git",
+    "accountId": "0c2b679b-9f82-43fe-b777-d8effb4854be"
   }
-}</component>
-  <component name="KubernetesApiPersistence">{}</component>
-  <component name="KubernetesApiProvider">{
-  &quot;isMigrated&quot;: true
-}</component>
-  <component name="ProjectColorInfo">{
-  &quot;associatedIndex&quot;: 1
-}</component>
-  <component name="ProjectId" id="2kWTZJ1Du9ipVn98iUWNIOq93ND" />
+}]]></component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 1
+}]]></component>
+  <component name="ProjectId" id="2mOOjGwvPNQVTkNgzjv1S6y8MRb" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
-    "Application.Application.executor": "Run",
-    "Application.JdbcRunner.executor": "Debug",
-    "Application.Main (1).executor": "Run",
-    "Application.Main.executor": "Run",
-    "Application.TestDB.executor": "Run",
-    "Application.com.alex.Main.executor": "Run",
-    "Application.com.example.Main.executor": "Run",
-    "Maven. [org.apache.maven.plugins:maven-archetype-plugin:RELEASE:generate].executor": "Run",
-    "Maven.main [clean].executor": "Run",
-    "Maven.senla-homework [clean].executor": "Run",
-    "Maven.senla-homework [install].executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "homework-6-spring-orm",
+    "git-widget-placeholder": "#10 on homework-6-spring-orm",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/Users/chekurov/senla-homework-1/homework-3",
     "node.js.detected.package.eslint": "true",
@@ -73,125 +50,9 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.15",
-    "project.structure.side.proportion": "0.46666667",
-    "settings.editor.selected.configurable": "preferences.keymap",
     "vue.rearranger.settings.migration": "true"
-  },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "postgresql"
-    ]
   }
 }]]></component>
-  <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/di/src/main/java/com/alex" />
-      <recent name="$PROJECT_DIR$/di/src/main/resources" />
-      <recent name="$PROJECT_DIR$/di/src/main/java" />
-      <recent name="$PROJECT_DIR$/di" />
-    </key>
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/src/main/resources/liquibase/changelogs" />
-      <recent name="$PROJECT_DIR$/src/main/resources/liquibase" />
-      <recent name="$PROJECT_DIR$/src/main/resources/changelogs" />
-      <recent name="$PROJECT_DIR$/src/main/resources" />
-      <recent name="$PROJECT_DIR$/src" />
-    </key>
-    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
-      <recent name="" />
-    </key>
-    <key name="CopyClassDialog.RECENTS_KEY">
-      <recent name="com.alex.homework4example" />
-      <recent name="" />
-    </key>
-  </component>
-  <component name="RunManager" selected="Application.Application">
-    <configuration name="Application" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="com.alex.homework4example.Application" />
-      <module name="senla-homework" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="com.alex.homework4example.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
-        <option name="credential" />
-        <option name="region" />
-        <option name="useCurrentConnection" value="false" />
-      </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="JdbcRunner" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="com.alex.homework4example.JdbcRunner" />
-      <module name="senla-homework" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="com.alex.homework4example.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="Main (1)" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="Main" />
-      <module name="di" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="TestDB" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="TestDB" />
-      <module name="senla-homework" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="com.example.Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <envs>
-        <env name="DB_USERNAME" value="postgres" />
-        <env name="DB_PASSWORD" value="postgres" />
-      </envs>
-      <option name="MAIN_CLASS_NAME" value="com.example.Main" />
-      <module name="main" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="com.example.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <extension name="software.aws.toolkits.jetbrains.core.execution.JavaAwsConnectionExtension">
-        <option name="credential" />
-        <option name="region" />
-        <option name="useCurrentConnection" value="false" />
-      </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <list>
-      <item itemvalue="Application.TestDB" />
-      <item itemvalue="Application.JdbcRunner" />
-      <item itemvalue="Application.Application" />
-      <item itemvalue="Application.com.example.Main" />
-      <item itemvalue="Application.Main (1)" />
-    </list>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Application.Application" />
-        <item itemvalue="Application.Main (1)" />
-        <item itemvalue="Application.com.example.Main" />
-        <item itemvalue="Application.JdbcRunner" />
-        <item itemvalue="Application.TestDB" />
-      </list>
-    </recent_temporary>
-  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -203,77 +64,16 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="ee675f5d-6c32-4546-8236-c17c15e98264" name="Changes" comment="" />
-      <created>1723398387935</created>
+      <changelist id="b6462f66-548a-4a6f-9502-dea546df7da5" name="Changes" comment="" />
+      <created>1726944289382</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1723398387935</updated>
-      <workItem from="1723398389197" duration="4254000" />
-      <workItem from="1723539620986" duration="17569000" />
-      <workItem from="1723638311624" duration="4799000" />
-      <workItem from="1723709529160" duration="166000" />
-      <workItem from="1724086892609" duration="30000" />
-      <workItem from="1724087139462" duration="43000" />
-      <workItem from="1724176932911" duration="98000" />
-      <workItem from="1724234276023" duration="4000" />
-      <workItem from="1724234294599" duration="14568000" />
-      <workItem from="1724264432649" duration="97000" />
-      <workItem from="1724762971924" duration="11139000" />
-      <workItem from="1724845882382" duration="16982000" />
-      <workItem from="1724923913334" duration="9951000" />
-      <workItem from="1725016002176" duration="102000" />
-      <workItem from="1725020368651" duration="48000" />
-      <workItem from="1725020551532" duration="127000" />
-      <workItem from="1725021600598" duration="600000" />
-      <workItem from="1725221643519" duration="99000" />
-      <workItem from="1725531647353" duration="16097000" />
-      <workItem from="1725618992973" duration="413000" />
-      <workItem from="1725892655490" duration="31000" />
-      <workItem from="1725990991302" duration="6395000" />
-      <workItem from="1726062690701" duration="10616000" />
-      <workItem from="1726136650345" duration="11135000" />
-      <workItem from="1726203420175" duration="166000" />
-      <workItem from="1726308618917" duration="16252000" />
-      <workItem from="1726337623118" duration="449000" />
-      <workItem from="1726338135433" duration="148000" />
-      <workItem from="1726338292120" duration="75000" />
-      <workItem from="1726338406747" duration="643000" />
-      <workItem from="1726339151556" duration="2383000" />
-      <workItem from="1726394790456" duration="195000" />
-      <workItem from="1726395003159" duration="9047000" />
-      <workItem from="1726765222389" duration="259000" />
-      <workItem from="1726934318807" duration="34000" />
-      <workItem from="1726934370243" duration="2294000" />
+      <updated>1726944289382</updated>
+      <workItem from="1726944290581" duration="432000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
-  </component>
-  <component name="Vcs.Log.Tabs.Properties">
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State />
-          </value>
-        </entry>
-      </map>
-    </option>
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/com/alex/homework4example/utils/ParametersHolder.java</url>
-          <line>13</line>
-          <option name="timeStamp" value="7" />
-        </line-breakpoint>
-        <breakpoint enabled="true" type="java-exception">
-          <properties class="java.lang.RuntimeException" package="java.lang" />
-          <option name="timeStamp" value="8" />
-        </breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>
