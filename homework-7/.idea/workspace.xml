@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="72832bde-22f5-4f60-ad5e-cced6d3cdbe6" name="Changes" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+        <option value="Record" />
+        <option value="JUnit5 Test Class" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
+  <component name="ProjectId" id="2mb2r0NsHekaFxnc2eM53kljim5" />
+  <component name="ProjectViewState">
+    <option name="autoscrollFromSource" value="true" />
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.Application.executor": "Run",
+    "JUnit.AccountControllerTest.createAccount.executor": "Debug",
+    "JUnit.AccountControllerTest.deleteAccount.executor": "Run",
+    "JUnit.AccountControllerTest.executor": "Debug",
+    "JUnit.AccountRepositoryTest.executor": "Run",
+    "JUnit.AccountServiceImplTest.executor": "Run",
+    "JUnit.AccountServiceImplTest.testTransferMoney_InsufficientFunds.executor": "Run",
+    "JUnit.AddressControllerTest.executor": "Run",
+    "JUnit.AddressRepositoryTest.executor": "Run",
+    "JUnit.AddressServiceImplTest.executor": "Run",
+    "JUnit.AddressServiceImplTest.testFindAll.executor": "Debug",
+    "JUnit.CardControllerTest.createCard.executor": "Debug",
+    "JUnit.CardControllerTest.executor": "Run",
+    "JUnit.CardRepositoryTest.executor": "Run",
+    "JUnit.CardServiceImplTest.executor": "Run",
+    "JUnit.CustomerRepositoryTest.executor": "Run",
+    "JUnit.CustomerRepositoryTest.testFindAllWithAccountsFetch.executor": "Run",
+    "JUnit.CustomerServiceImplTest.executor": "Run",
+    "JUnit.RoleControllerTest.createRole.executor": "Run",
+    "JUnit.RoleControllerTest.executor": "Run",
+    "JUnit.RoleRepositoryTest.executor": "Run",
+    "JUnit.RoleServiceImplTest.executor": "Run",
+    "JUnit.TransactionControllerTest.executor": "Run",
+    "JUnit.TransactionRepositoryTest.executor": "Run",
+    "JUnit.TransactionServiceImplTest.executor": "Run",
+    "JUnit.UserControllerTest.createUser.executor": "Run",
+    "JUnit.UserControllerTest.executor": "Run",
+    "JUnit.UserControllerTest.getAllUsers.executor": "Run",
+    "JUnit.UserRepositoryTest.executor": "Run",
+    "JUnit.UserServiceImplTest.executor": "Run",
+    "JUnit.homework4example in senla-homework.executor": "Run",
+    "JUnit.java in senla-homework.executor": "Run",
+    "JUnit.repository in senla-homework.executor": "Run",
+    "Maven.senla-homework [clean,install].executor": "Run",
+    "Maven.senla-homework [clean,package].executor": "Run",
+    "Maven.senla-homework [clean].executor": "Run",
+    "Maven.senla-homework [install].executor": "Run",
+    "Maven.senla-homework [org.apache.tomcat.maven:tomcat7-maven-plugin:2.2:deploy].executor": "Run",
+    "Maven.senla-homework [org.apache.tomcat.maven:tomcat7-maven-plugin:2.2:exec-war].executor": "Run",
+    "Maven.senla-homework [org.apache.tomcat.maven:tomcat7-maven-plugin:2.2:redeploy].executor": "Run",
+    "Maven.senla-homework [org.apache.tomcat.maven:tomcat7-maven-plugin:2.2:run-war].executor": "Run",
+    "Maven.senla-homework [org.apache.tomcat.maven:tomcat7-maven-plugin:2.2:run].executor": "Run",
+    "Maven.senla-homework [org.apache.tomcat.maven:tomcat7-maven-plugin:2.2:standalone-war].executor": "Run",
+    "Maven.senla-homework [org.opoo.maven:tomcat9-maven-plugin:3.0.1:deploy-only].executor": "Run",
+    "Maven.senla-homework [org.opoo.maven:tomcat9-maven-plugin:3.0.1:deploy].executor": "Run",
+    "Maven.senla-homework [org.opoo.maven:tomcat9-maven-plugin:3.0.1:redeploy].executor": "Run",
+    "Maven.senla-homework [org.opoo.maven:tomcat9-maven-plugin:3.0.1:run-war-only].executor": "Run",
+    "Maven.senla-homework [org.opoo.maven:tomcat9-maven-plugin:3.0.1:run].executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary": "JUnit5",
+    "com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.JUnit5": "",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/o.d.galimov/Desktop/homework-7",
+    "settings.editor.selected.configurable": "project.propVCSSupport.ChangelistConflict"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+    <key name="CreateTestDialog.Recents.Supers">
+      <recent name="" />
+    </key>
+    <key name="CreateTestDialog.RecentsKey">
+      <recent name="com.alex.homework4example.controller" />
+      <recent name="com.alex.homework4example.service.impl" />
+      <recent name="com.alex.homework4example.repository" />
+    </key>
+  </component>
+  <component name="RunManager" selected="JUnit.CustomerControllerTest">
+    <configuration name="AccountControllerTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="senla-homework" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.alex.homework4example.controller.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.alex.homework4example.controller" />
+      <option name="MAIN_CLASS_NAME" value="com.alex.homework4example.controller.AccountControllerTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="AccountControllerTest.deleteAccount" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="senla-homework" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.alex.homework4example.controller.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.alex.homework4example.controller" />
+      <option name="MAIN_CLASS_NAME" value="com.alex.homework4example.controller.AccountControllerTest" />
+      <option name="METHOD_NAME" value="deleteAccount" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="CardControllerTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="senla-homework" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.alex.homework4example.controller.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.alex.homework4example.controller" />
+      <option name="MAIN_CLASS_NAME" value="com.alex.homework4example.controller.CardControllerTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="CardControllerTest.createCard" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="senla-homework" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.alex.homework4example.controller.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.alex.homework4example.controller" />
+      <option name="MAIN_CLASS_NAME" value="com.alex.homework4example.controller.CardControllerTest" />
+      <option name="METHOD_NAME" value="createCard" />
+      <option name="TEST_OBJECT" value="method" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="CustomerControllerTest" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
+      <module name="senla-homework" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.alex.homework4example.controller.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="com.alex.homework4example.controller" />
+      <option name="MAIN_CLASS_NAME" value="com.alex.homework4example.controller.CustomerControllerTest" />
+      <option name="TEST_OBJECT" value="class" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="JUnit.CustomerControllerTest" />
+        <item itemvalue="JUnit.CardControllerTest" />
+        <item itemvalue="JUnit.CardControllerTest.createCard" />
+        <item itemvalue="JUnit.AccountControllerTest.deleteAccount" />
+        <item itemvalue="JUnit.AccountControllerTest" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="SvnConfiguration">
+    <configuration>$USER_HOME$/.subversion</configuration>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="72832bde-22f5-4f60-ad5e-cced6d3cdbe6" name="Changes" comment="" />
+      <created>1727331149191</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1727331149191</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/com/alex/homework4example/config/DataBaseConfig.java</url>
+          <line>49</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/test/java/com/alex/homework4example/service/impl/AddressServiceImplTest.java</url>
+          <line>112</line>
+          <option name="timeStamp" value="8" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/com/alex/homework4example/repository/AbstractRepository.java</url>
+          <line>66</line>
+          <option name="timeStamp" value="17" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/com/alex/homework4example/controller/AccountController.java</url>
+          <line>57</line>
+          <option name="timeStamp" value="19" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/com/alex/homework4example/service/impl/AbstractCrudService.java</url>
+          <line>26</line>
+          <option name="timeStamp" value="20" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/main/java/com/alex/homework4example/service/impl/AbstractCrudService.java</url>
+          <line>20</line>
+          <option name="timeStamp" value="21" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>
