@@ -1,1 +1,0 @@
-CREATE INDEX idx_users_role_id ON banking.users(role_id);

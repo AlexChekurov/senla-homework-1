@@ -1,2 +1,0 @@
-CREATE INDEX idx_customers_accounts_customer_id ON banking.customers_accounts(customer_id);
-CREATE INDEX idx_customers_accounts_account_id ON banking.customers_accounts(account_id);

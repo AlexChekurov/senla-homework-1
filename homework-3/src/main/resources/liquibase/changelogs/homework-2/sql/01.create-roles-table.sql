@@ -1,5 +1,0 @@
-CREATE TABLE banking.roles
-(
-    id   BIGSERIAL PRIMARY KEY,
-    name VARCHAR(50) UNIQUE NOT NULL
-);
