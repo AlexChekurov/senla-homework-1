@@ -22,7 +22,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class RoleServiceImplTest {
+public class RoleServiceImplTest {
 
     @Mock
     private AbstractRepository<Role> roleRepository;
@@ -48,16 +48,13 @@ class RoleServiceImplTest {
     }
 
     @Test
-    void testCreateRole() {
-        //given
+    public void testCreateRole() {
         when(roleMapper.toEntity(any(RoleDTO.class))).thenReturn(role);
         when(roleRepository.create(any(Role.class))).thenReturn(role);
         when(roleMapper.toDto(any(Role.class))).thenReturn(roleDTO);
 
-        //when
         RoleDTO createdRoleDTO = roleService.create(roleDTO);
 
-        //then
         assertNotNull(createdRoleDTO);
         assertEquals(roleDTO.getName(), createdRoleDTO.getName());
         verify(roleMapper).toEntity(roleDTO);
@@ -66,60 +63,49 @@ class RoleServiceImplTest {
     }
 
     @Test
-    void testFindById() {
-        //given
+    public void testFindById() {
         when(roleRepository.findById(1L)).thenReturn(Optional.of(role));
         when(roleMapper.toDto(role)).thenReturn(roleDTO);
 
-        //when
-        RoleDTO foundRoleDTO = roleService.findDtoById(1L);
+        Optional<RoleDTO> foundRoleDTO = roleService.findDtoById(1L);
 
-        //then
-        assertEquals(roleDTO.getId(), foundRoleDTO.getId());
+        assertTrue(foundRoleDTO.isPresent());
+        assertEquals(roleDTO.getId(), foundRoleDTO.get().getId());
         verify(roleRepository).findById(1L);
     }
 
     @Test
-    void testUpdateRole() {
-        //given
-        when(roleRepository.findById(role.getId()))
-                .thenReturn(Optional.ofNullable(role));
+    public void testUpdateRole() {
+        when(roleMapper.toEntity(any(RoleDTO.class))).thenReturn(role);
         when(roleRepository.update(any(Role.class))).thenReturn(role);
         when(roleMapper.toDto(any(Role.class))).thenReturn(roleDTO);
 
-        //when
-        RoleDTO updatedRoleDTO = roleService.update(role.getId(), roleDTO);
+        RoleDTO updatedRoleDTO = roleService.update(roleDTO);
 
-        //then
         assertNotNull(updatedRoleDTO);
         assertEquals(roleDTO.getName(), updatedRoleDTO.getName());
+        verify(roleMapper).toEntity(roleDTO);
         verify(roleRepository).update(role);
         verify(roleMapper).toDto(role);
     }
 
     @Test
-    void testDeleteById() {
-        //given
+    public void testDeleteById() {
         when(roleRepository.deleteById(1L)).thenReturn(true);
 
-        //when
         boolean result = roleService.deleteById(1L);
 
-        //then
         assertTrue(result);
         verify(roleRepository).deleteById(1L);
     }
 
     @Test
-    void testFindAll() {
-        //given
+    public void testFindAll() {
         when(roleRepository.findAll()).thenReturn(List.of(role));
         when(roleMapper.toDto(any(Role.class))).thenReturn(roleDTO);
 
-        //when
         List<RoleDTO> allRoles = roleService.findAll();
 
-        //then
         assertEquals(1, allRoles.size());
         assertEquals(roleDTO.getName(), allRoles.get(0).getName());
         verify(roleRepository).findAll();

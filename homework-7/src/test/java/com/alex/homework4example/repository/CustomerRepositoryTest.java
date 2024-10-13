@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -32,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringJUnitConfig(classes = { AppConfig.class, DataBaseConfig.class })
 @WebAppConfiguration
 @TestPropertySource(locations = "classpath:application-test.properties")
-class CustomerRepositoryTest {
+public class CustomerRepositoryTest {
 
     @Autowired
     private CustomerRepository customerRepository;
@@ -41,111 +40,12 @@ class CustomerRepositoryTest {
     private static Random random = new Random();
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         random = new Random();
+
+        // Clear the database before each test
         customerRepository.deleteAll();
-        accountRepository.deleteAll();
-    }
-
-    @Test
-    void testCreateCustomer() {
-        // when
-        Customer customer = createTestCustomer();
-
-        // then
-        assertNotNull(customer.getId());
-    }
-
-    @Test
-    void testFindById() {
-        // given
-        Customer customer = createTestCustomer();
-
-        // when
-        Optional<Customer> foundCustomer = customerRepository.findById(customer.getId());
-
-        // then
-        assertTrue(foundCustomer.isPresent());
-        assertEquals(customer.getId(), foundCustomer.get().getId());
-    }
-
-    @Test
-    void testUpdateCustomer() {
-        // given
-        Customer customer = createTestCustomer();
-        customer.setLastName("Smith");
-        customerRepository.update(customer);
-
-        // when
-        Optional<Customer> updatedCustomer = customerRepository.findById(customer.getId());
-
-        // then
-        assertTrue(updatedCustomer.isPresent());
-        assertEquals("Smith", updatedCustomer.get().getLastName());
-    }
-
-    @Test
-    void testDeleteCustomer() {
-        // given
-        Customer customer = createTestCustomer();
-        Optional<Customer> foundCustomerBeforeDeletion = customerRepository.findById(customer.getId());
-        assertTrue(foundCustomerBeforeDeletion.isPresent(), "Customer should exist before deletion");
-
-        // when
-        customerRepository.deleteById(customer.getId());
-
-        // then
-        Optional<Customer> deletedCustomer = customerRepository.findById(customer.getId());
-        assertFalse(deletedCustomer.isPresent(), "Customer should be deleted and not found in the database");
-    }
-
-    @Test
-    void testFindAllWithAccountsFetch() {
-        // given
-        Customer customer = createTestCustomer();
-        createTestAccountsForCustomer(customer, 2);
-
-        // when
-        List<Customer> customers = customerRepository.findAllWithAccountsFetch();
-
-        // then
-        assertEquals(1, customers.size());
-        assertEquals("John", customers.get(0).getFirstName());
-        assertThat(customers)
-                .allMatch(c -> "John".equals(c.getFirstName()))
-                .allMatch(c -> c.getAccounts().size() == 2);
-    }
-
-    @Test
-    void testFindAllWithAccountsFetchJPQL() {
-        // given
-        Customer customer = createTestCustomer();
-        createTestAccountsForCustomer(customer, 2);
-
-        // when
-        List<Customer> customers = customerRepository.findAllWithAccountsFetchJPQL();
-
-        // then
-        assertThat(customers)
-                .hasSize(1)
-                .first()
-                .matches(c -> "John".equals(c.getFirstName()) && c.getAccounts().size() == 2);
-    }
-
-    @Test
-    void testFindAllWithAccountsEntityGraph() {
-        // given
-        Customer customer = createTestCustomer();
-        createTestAccountsForCustomer(customer, 2);
-
-        // when
-        List<Customer> customers = customerRepository.findAllWithAccountsEntityGraph();
-
-        // then
-        assertThat(customers)
-                .hasSize(1)
-                .first()
-                .matches(c -> "John".equals(c.getFirstName()) && c.getAccounts().size() == 2);
+        accountRepository.deleteAll(); // Ensure account repository is cleared as well
     }
 
     private Customer createTestCustomer() {
@@ -174,6 +74,74 @@ class CustomerRepositoryTest {
             accounts.add(account);
         }
         customer.setAccounts(accounts);
+    }
+
+    @Test
+    public void testCreateCustomer() {
+        Customer customer = createTestCustomer();
+        assertNotNull(customer.getId());
+    }
+
+    @Test
+    public void testFindById() {
+        Customer customer = createTestCustomer();
+        Optional<Customer> foundCustomer = customerRepository.findById(customer.getId());
+        assertTrue(foundCustomer.isPresent());
+        assertEquals(customer.getId(), foundCustomer.get().getId());
+    }
+
+    @Test
+    public void testUpdateCustomer() {
+        Customer customer = createTestCustomer();
+        customer.setLastName("Smith");
+        customerRepository.update(customer);
+
+        Optional<Customer> updatedCustomer = customerRepository.findById(customer.getId());
+        assertTrue(updatedCustomer.isPresent());
+        assertEquals("Smith", updatedCustomer.get().getLastName());
+    }
+
+    @Test
+    public void testDeleteCustomer() {
+        Customer customer = createTestCustomer();
+
+        Optional<Customer> foundCustomerBeforeDeletion = customerRepository.findById(customer.getId());
+        assertTrue(foundCustomerBeforeDeletion.isPresent(), "Customer should exist before deletion");
+
+        customerRepository.deleteById(customer.getId());
+
+        Optional<Customer> deletedCustomer = customerRepository.findById(customer.getId());
+        assertFalse(deletedCustomer.isPresent(), "Customer should be deleted and not found in the database");
+    }
+
+    @Test
+    public void testFindAllWithAccountsFetch() {
+        Customer customer = createTestCustomer();
+        createTestAccountsForCustomer(customer, 2); // Create 2 accounts for the customer
+        List<Customer> customers = customerRepository.findAllWithAccountsFetch();
+        assertEquals(1, customers.size());
+        assertEquals("John", customers.get(0).getFirstName());
+        assertEquals(2, customers.get(0).getAccounts().size()); // Check that accounts are fetched
+    }
+
+    @Test
+    public void testFindAllWithAccountsFetchJPQL() {
+        Customer customer = createTestCustomer();
+        createTestAccountsForCustomer(customer, 2); // Create 2 accounts for the customer
+        List<Customer> customers = customerRepository.findAllWithAccountsFetchJPQL();
+        assertEquals(1, customers.size());
+        assertEquals("John", customers.get(0).getFirstName());
+        assertEquals(2, customers.get(0).getAccounts().size()); // Check that accounts are fetched
+    }
+
+    @Test
+    public void testFindAllWithAccountsEntityGraph() {
+        Customer customer = createTestCustomer();
+        createTestAccountsForCustomer(customer, 2); // Create 2 accounts for the customer
+        List<Customer> customers = customerRepository.findAllWithAccountsEntityGraph();
+        assertEquals(1, customers.size());
+        assertEquals("John", customers.get(0).getFirstName());
+        assertEquals(2, customers.get(0).getAccounts().size()); // Check that accounts are fetched
     }
 
 }

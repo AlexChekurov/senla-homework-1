@@ -60,7 +60,6 @@ class TransactionControllerTest {
     @SneakyThrows
     @Test
     void createTransaction() {
-        //given
         String transactionJson = """
                 {
                     "amount": 1000.00,
@@ -70,7 +69,7 @@ class TransactionControllerTest {
                     "currency": "USD"
                 }
                 """;
-        //when
+
         mockMvc.perform(post("/api/v1/transactions")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(transactionJson))
@@ -78,7 +77,6 @@ class TransactionControllerTest {
                 .andExpect(jsonPath("$.amount").value(1000.00))
                 .andExpect(jsonPath("$.currency").value("USD"));
 
-        //then
         assertThat(transactionRepository.findAll()).hasSize(1);
         Transaction transaction = transactionRepository.findAll().get(0);
         assertThat(transaction.getAmount()).isEqualByComparingTo(BigDecimal.valueOf(1000.00));
@@ -88,51 +86,42 @@ class TransactionControllerTest {
     @SneakyThrows
     @Test
     void getAllTransactions() {
-        //given
         transactionService.create(new TransactionDTO(null, BigDecimal.valueOf(1000.00),
                 LocalDateTime.now(), 1L, 2L, "USD"));
 
-        //when
         mockMvc.perform(get("/api/v1/transactions"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].amount").value(1000.00));
 
-        //then
         assertThat(transactionRepository.findAll()).hasSize(1);
     }
 
     @SneakyThrows
     @Test
     void getTransactionById() {
-        //given
         TransactionDTO createdTransaction = transactionService.create(new TransactionDTO(null,
                 BigDecimal.valueOf(1000.00), LocalDateTime.now(), 1L, 2L, "USD"));
 
-        //when
         mockMvc.perform(get("/api/v1/transactions/" + createdTransaction.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.amount").value(1000.00));
 
-        //then
         assertThat(transactionRepository.findById(createdTransaction.getId())).isPresent();
     }
 
     @SneakyThrows
     @Test
     void getTransactionById_NotFound() {
-        //when
         mockMvc.perform(get("/api/v1/transactions/999"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Can't find entity with id: 999"));
+                .andExpect(jsonPath("$.message").value("Can't find transaction with id: 999"));
 
-        //then
         assertThat(transactionRepository.findAll()).isEmpty();
     }
 
     @SneakyThrows
     @Test
     void updateTransaction() {
-        //given
         TransactionDTO createdTransaction = transactionService.create(new TransactionDTO(null,
                 BigDecimal.valueOf(1000.00), LocalDateTime.now(), 1L, 2L, "USD"));
         String updatedTransactionJson = """
@@ -145,7 +134,6 @@ class TransactionControllerTest {
                 }
                 """;
 
-        //when
         mockMvc.perform(put("/api/v1/transactions/" + createdTransaction.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updatedTransactionJson))
@@ -153,7 +141,6 @@ class TransactionControllerTest {
                 .andExpect(jsonPath("$.amount").value(2000.00))
                 .andExpect(jsonPath("$.currency").value("EUR"));
 
-        //then
         Transaction updatedTransaction = transactionRepository.findById(createdTransaction.getId()).get();
         assertThat(updatedTransaction.getAmount()).isEqualByComparingTo(BigDecimal.valueOf(2000.00));
         assertThat(updatedTransaction.getCurrency()).isEqualTo("EUR");
@@ -162,7 +149,6 @@ class TransactionControllerTest {
     @SneakyThrows
     @Test
     void updateTransaction_NotFound() {
-        //given
         String updatedTransactionJson = """
                 {
                     "amount": 2000.00,
@@ -173,29 +159,24 @@ class TransactionControllerTest {
                 }
                 """;
 
-        //when
         mockMvc.perform(put("/api/v1/transactions/999")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updatedTransactionJson))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Can't update transaction with id: 999"));
 
-        //then
         assertThat(transactionRepository.findAll()).isEmpty();
     }
 
     @SneakyThrows
     @Test
     void deleteTransaction() {
-        //given
         TransactionDTO createdTransaction = transactionService.create(new TransactionDTO(null,
                 BigDecimal.valueOf(1000.00), LocalDateTime.now(), 1L, 2L, "USD"));
 
-        //when
         mockMvc.perform(delete("/api/v1/transactions/" + createdTransaction.getId()))
                 .andExpect(status().isOk());
 
-        //then
         assertThat(transactionRepository.findById(createdTransaction.getId())).isNotPresent();
     }
 }

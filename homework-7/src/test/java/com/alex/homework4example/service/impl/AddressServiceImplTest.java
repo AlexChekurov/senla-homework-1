@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
-class AddressServiceImplTest {
+public class AddressServiceImplTest {
 
     @Mock
     private AbstractRepository<Address> addressRepository;
@@ -54,16 +54,13 @@ class AddressServiceImplTest {
     }
 
     @Test
-    void testCreateAddress() {
-        //given
+    public void testCreateAddress() {
         when(addressMapper.toEntity(any(AddressDTO.class))).thenReturn(address);
         when(addressRepository.create(any(Address.class))).thenReturn(address);
         when(addressMapper.toDto(any(Address.class))).thenReturn(addressDTO);
 
-        //when
         AddressDTO createdAddressDTO = addressService.create(addressDTO);
 
-        //then
         assertNotNull(createdAddressDTO);
         assertEquals(addressDTO.getStreet(), createdAddressDTO.getStreet());
         verify(addressMapper).toEntity(addressDTO);
@@ -72,59 +69,49 @@ class AddressServiceImplTest {
     }
 
     @Test
-    void testFindById() {
-        //given
+    public void testFindById() {
         when(addressRepository.findById(1L)).thenReturn(Optional.of(address));
         when(addressMapper.toDto(address)).thenReturn(addressDTO);
 
-        //when
-        AddressDTO foundAddressDTO = addressService.findDtoById(1L);
+        Optional<AddressDTO> foundAddressDTO = addressService.findDtoById(1L);
 
-        //then
-        assertEquals(addressDTO.getId(), foundAddressDTO.getId());
+        assertTrue(foundAddressDTO.isPresent());
+        assertEquals(addressDTO.getId(), foundAddressDTO.get().getId());
         verify(addressRepository).findById(1L);
     }
 
     @Test
-    void testUpdateAddress() {
-        //given
-        when(addressRepository.findById(address.getId())).thenReturn(Optional.ofNullable(address));
+    public void testUpdateAddress() {
+        when(addressMapper.toEntity(any(AddressDTO.class))).thenReturn(address);
         when(addressRepository.update(any(Address.class))).thenReturn(address);
         when(addressMapper.toDto(any(Address.class))).thenReturn(addressDTO);
 
-        //when
-        AddressDTO updatedAddressDTO = addressService.update(address.getId(), addressDTO);
+        AddressDTO updatedAddressDTO = addressService.update(addressDTO);
 
-        //then
         assertNotNull(updatedAddressDTO);
         assertEquals(addressDTO.getStreet(), updatedAddressDTO.getStreet());
+        verify(addressMapper).toEntity(addressDTO);
         verify(addressRepository).update(address);
         verify(addressMapper).toDto(address);
     }
 
     @Test
-    void testDeleteById() {
-        //given
+    public void testDeleteById() {
         when(addressRepository.deleteById(1L)).thenReturn(true);
 
-        //when
         boolean result = addressService.deleteById(1L);
 
-        //then
         assertTrue(result);
         verify(addressRepository).deleteById(1L);
     }
 
     @Test
-    void testFindAll() {
-        //given
+    public void testFindAll() {
         when(addressRepository.findAll()).thenReturn(List.of(address));
         when(addressMapper.toDto(any(Address.class))).thenReturn(addressDTO);
 
-        //when
         List<AddressDTO> allAddresses = addressService.findAll();
 
-        //then
         assertEquals(1, allAddresses.size());
         assertEquals(addressDTO.getStreet(), allAddresses.get(0).getStreet());
         verify(addressRepository).findAll();

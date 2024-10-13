@@ -1,6 +1,5 @@
 package com.alex.homework4example.service.impl;
 
-import com.alex.homework4example.exception.EntityNotFoundException;
 import com.alex.homework4example.mapper.CommonMapper;
 import com.alex.homework4example.repository.AbstractRepository;
 import com.alex.homework4example.service.CrudService;
@@ -34,14 +33,13 @@ public abstract class AbstractCrudService<E, D> implements CrudService<E, D> {
     }
 
     @Override
-    public D findDtoById(Long id) {
+    public Optional<D> findDtoById(Long id) {
         return findById(id)
-                .map(mapper::toDto)
-                .orElseThrow(() -> new EntityNotFoundException("Can't find entity with id: " + id));
+                .map(mapper::toDto);
     }
 
     @Override
-    public D update(Long id, D dto) {
+    public D update(D dto) {
         var entity = mapper.toEntity(dto);
         return mapper.toDto(updateEntity(entity));
     }

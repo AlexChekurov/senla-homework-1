@@ -9,11 +9,11 @@ public interface CrudService<Entity, DTO> {
 
     Entity createEntity(Entity entity);
 
-    DTO findDtoById(Long id);
+    Optional<DTO> findDtoById(Long id);
 
     Optional<Entity> findById(Long id);
 
-    DTO update(Long accountId, DTO dto);
+    DTO update(DTO dto);
 
     Entity updateEntity(Entity entity);
 

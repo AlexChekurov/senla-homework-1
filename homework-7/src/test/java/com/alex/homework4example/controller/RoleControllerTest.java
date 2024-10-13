@@ -56,17 +56,14 @@ class RoleControllerTest {
     @SneakyThrows
     @Test
     void createRole() {
-        //given
         String roleJson = "{\"name\":\"Admin\"}";
 
-        //when
         mockMvc.perform(post("/api/v1/roles")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(roleJson))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Admin"));
 
-        //then
         assertThat(roleRepository.findAll()).hasSize(1);
         assertThat(roleRepository.findAll().get(0).getName()).isEqualTo("Admin");
     }
@@ -74,57 +71,49 @@ class RoleControllerTest {
     @SneakyThrows
     @Test
     void getAllRoles() {
-        //given
         roleService.create(new RoleDTO(null, "Admin"));
 
-        //when
         mockMvc.perform(get("/api/v1/roles"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Admin"));
-        //then
+
         assertThat(roleRepository.findAll()).hasSize(1);
     }
 
     @SneakyThrows
     @Test
     void getRoleById() {
-        //given
         RoleDTO createdRole = roleService.create(new RoleDTO(null, "Admin"));
 
-        //when
         mockMvc.perform(get("/api/v1/roles/" + createdRole.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Admin"));
-        //then
+
         assertThat(roleRepository.findById(createdRole.getId())).isPresent();
     }
 
     @SneakyThrows
     @Test
     void getRoleById_NotFound() {
-        //when
         mockMvc.perform(get("/api/v1/roles/999"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Can't find entity with id: 999"));
+                .andExpect(jsonPath("$.message").value("Can't find role with id :999"));
 
-        //then
         assertThat(roleRepository.findAll()).isEmpty();
     }
 
     @SneakyThrows
     @Test
     void updateRole() {
-        //given
         RoleDTO createdRole = roleService.create(new RoleDTO(null, "Admin"));
         String roleJson = "{\"name\":\"User\"}";
 
-        //when
         mockMvc.perform(put("/api/v1/roles/" + createdRole.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(roleJson))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("User"));
-        //then
+
         assertThat(roleRepository.findById(createdRole.getId())).isPresent();
         assertThat(roleRepository.findById(createdRole.getId()).get().getName()).isEqualTo("User");
     }
@@ -132,31 +121,25 @@ class RoleControllerTest {
     @SneakyThrows
     @Test
     void updateRole_NotFound() {
-        //given
         String roleJson = "{\"name\":\"User\"}";
 
-        //when
         mockMvc.perform(put("/api/v1/roles/999")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(roleJson))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Can't update role with id :999"));
 
-        //then
         assertThat(roleRepository.findAll()).isEmpty();
     }
 
     @SneakyThrows
     @Test
     void deleteRole() {
-        //given
         RoleDTO createdRole = roleService.create(new RoleDTO(null, "Admin"));
 
-        //when
         mockMvc.perform(delete("/api/v1/roles/" + createdRole.getId()))
                 .andExpect(status().isOk());
 
-        //then
         assertThat(roleRepository.findById(createdRole.getId())).isNotPresent();
     }
 

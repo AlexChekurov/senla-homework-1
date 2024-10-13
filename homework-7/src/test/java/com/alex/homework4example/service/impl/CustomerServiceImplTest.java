@@ -21,9 +21,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
 @ExtendWith(MockitoExtension.class)
-class CustomerServiceImplTest {
+public class CustomerServiceImplTest {
 
     @Mock
     private AbstractRepository<Customer> customerRepository;
@@ -55,16 +54,13 @@ class CustomerServiceImplTest {
     }
 
     @Test
-    void testCreateCustomer() {
-        //given
+    public void testCreateCustomer() {
         when(customerMapper.toEntity(any(CustomerDTO.class))).thenReturn(customer);
         when(customerRepository.create(any(Customer.class))).thenReturn(customer);
         when(customerMapper.toDto(any(Customer.class))).thenReturn(customerDTO);
 
-        //when
         CustomerDTO createdCustomerDTO = customerService.create(customerDTO);
 
-        //then
         assertNotNull(createdCustomerDTO);
         assertEquals(customerDTO.getFirstName(), createdCustomerDTO.getFirstName());
         verify(customerMapper).toEntity(customerDTO);
@@ -73,63 +69,51 @@ class CustomerServiceImplTest {
     }
 
     @Test
-    void testFindById() {
-        //given
+    public void testFindById() {
         when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
         when(customerMapper.toDto(customer)).thenReturn(customerDTO);
 
-        //when
-        var foundCustomerDTO = customerService.findDtoById(1L);
+        Optional<CustomerDTO> foundCustomerDTO = customerService.findDtoById(1L);
 
-        //then
-        assertEquals(customerDTO.getId(), foundCustomerDTO.getId());
+        assertTrue(foundCustomerDTO.isPresent());
+        assertEquals(customerDTO.getId(), foundCustomerDTO.get().getId());
         verify(customerRepository).findById(1L);
     }
 
     @Test
-    void testUpdateCustomer() {
-        //given
-        when(customerRepository.findById(customer.getId()))
-                .thenReturn(Optional.ofNullable(customer));
+    public void testUpdateCustomer() {
+        when(customerMapper.toEntity(any(CustomerDTO.class))).thenReturn(customer);
         when(customerRepository.update(any(Customer.class))).thenReturn(customer);
         when(customerMapper.toDto(any(Customer.class))).thenReturn(customerDTO);
 
-        //when
-        var updatedCustomerDTO = customerService.update(customer.getId(), customerDTO);
+        CustomerDTO updatedCustomerDTO = customerService.update(customerDTO);
 
-        //then
         assertNotNull(updatedCustomerDTO);
         assertEquals(customerDTO.getFirstName(), updatedCustomerDTO.getFirstName());
+        verify(customerMapper).toEntity(customerDTO);
         verify(customerRepository).update(customer);
         verify(customerMapper).toDto(customer);
     }
 
     @Test
-    void testDeleteById() {
-        //given
+    public void testDeleteById() {
         when(customerRepository.deleteById(1L)).thenReturn(true);
 
-        //when
         boolean result = customerService.deleteById(1L);
 
-        //then
         assertTrue(result);
         verify(customerRepository).deleteById(1L);
     }
 
     @Test
-    void testFindAll() {
-        //given
+    public void testFindAll() {
         when(customerRepository.findAll()).thenReturn(List.of(customer));
         when(customerMapper.toDto(any(Customer.class))).thenReturn(customerDTO);
 
-        //when
         List<CustomerDTO> allCustomers = customerService.findAll();
 
-        //then
         assertEquals(1, allCustomers.size());
         assertEquals(customerDTO.getFirstName(), allCustomers.get(0).getFirstName());
         verify(customerRepository).findAll();
     }
-
 }

@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringJUnitConfig(classes = {AppConfig.class, DataBaseConfig.class})
 @WebAppConfiguration
 @TestPropertySource(locations = "classpath:application-test.properties")
-class RoleRepositoryTest {
+public class RoleRepositoryTest {
 
     @Autowired
     private RoleRepository roleRepository;
@@ -36,66 +36,59 @@ class RoleRepositoryTest {
     private UserRepository userRepository;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
+
         userRepository.deleteAll();
         roleRepository.deleteAll();
 
     }
 
-    @Test
-    void testCreateRole() {
-        //when
-        Role role = createTestRole();
+    private Role createTestRole() {
+        Role role = new Role();
+        role.setName("ROLE_" + UUID.randomUUID().toString());
+        roleRepository.create(role);
+        return role;
+    }
 
-        //then
+    private User createTestUser(Role role) {
+        User user = new User();
+        user.setUsername(UUID.randomUUID().toString());
+        user.setRole(role);
+        user.setPassword(UUID.randomUUID().toString());
+        userRepository.create(user);
+        return user;
+    }
+
+    @Test
+    public void testCreateRole() {
+        Role role = createTestRole();
         assertNotNull(role.getId(), "Role ID should not be null after creation");
     }
 
     @Test
-    void testFindById() {
-        //given
+    public void testFindById() {
         Role role = createTestRole();
-
-        //when
         Optional<Role> foundRole = roleRepository.findById(role.getId());
-
-        //then
         assertTrue(foundRole.isPresent(), "Role should be found");
         assertEquals(role.getId(), foundRole.get().getId(), "The IDs should match");
     }
 
     @Test
-    void testUpdateRole() {
-        //given
+    public void testUpdateRole() {
         Role role = createTestRole();
         role.setName("ROLE_UPDATED");
         roleRepository.update(role);
 
-        //when
         Optional<Role> updatedRole = roleRepository.findById(role.getId());
-
-        //then
         assertTrue(updatedRole.isPresent(), "Role should be found after update");
         assertEquals("ROLE_UPDATED", updatedRole.get().getName(), "Role name should be updated");
     }
 
     @Test
-    void testFindAllRoles() {
-        //given
+    public void testFindAllRoles() {
         createTestRole();
         createTestRole();
-
-        //when
         List<Role> roles = roleRepository.findAll();
-
-        //then
         assertEquals(2, roles.size(), "There should be two roles in the database");
-    }
-
-    private Role createTestRole() {
-        Role role = new Role();
-        role.setName("ROLE_" + UUID.randomUUID());
-        roleRepository.create(role);
-        return role;
     }
 }

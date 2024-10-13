@@ -57,7 +57,6 @@ class AddressControllerTest {
     @SneakyThrows
     @Test
     void createAddress() {
-        //given
         String addressJson = """
                 {
                     "street": "Main St",
@@ -66,7 +65,6 @@ class AddressControllerTest {
                 }
                 """;
 
-        //when
         mockMvc.perform(post("/api/v1/addresses")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(addressJson))
@@ -75,7 +73,6 @@ class AddressControllerTest {
                 .andExpect(jsonPath("$.city").value("New York"))
                 .andExpect(jsonPath("$.postalCode").value("10001"));
 
-        //then
         assertThat(addressRepository.findAll()).hasSize(1);
         Address address = addressRepository.findAll().get(0);
         assertThat(address.getStreet()).isEqualTo("Main St");
@@ -86,53 +83,44 @@ class AddressControllerTest {
     @SneakyThrows
     @Test
     void getAllAddresses() {
-        //given
         addressService.create(new AddressDTO(null, "Main St", "New York", "10001"));
 
-        //when
         mockMvc.perform(get("/api/v1/addresses"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].street").value("Main St"))
                 .andExpect(jsonPath("$[0].city").value("New York"))
                 .andExpect(jsonPath("$[0].postalCode").value("10001"));
 
-        //then
         assertThat(addressRepository.findAll()).hasSize(1);
     }
 
     @SneakyThrows
     @Test
     void getAddressById() {
-        //given
         AddressDTO createdAddress = addressService.create(new AddressDTO(null, "Main St", "New York", "10001"));
 
-        //when
         mockMvc.perform(get("/api/v1/addresses/" + createdAddress.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.street").value("Main St"))
                 .andExpect(jsonPath("$.city").value("New York"))
                 .andExpect(jsonPath("$.postalCode").value("10001"));
 
-        //then
         assertThat(addressRepository.findById(createdAddress.getId())).isPresent();
     }
 
     @SneakyThrows
     @Test
     void getAddressById_NotFound() {
-        //when
         mockMvc.perform(get("/api/v1/addresses/999"))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Can't find entity with id: 999"));
+                .andExpect(jsonPath("$.message").value("Can't find address with id: 999"));
 
-        //then
         assertThat(addressRepository.findAll()).isEmpty();
     }
 
     @SneakyThrows
     @Test
     void updateAddress() {
-        //given
         AddressDTO createdAddress = addressService.create(new AddressDTO(null, "Main St", "New York", "10001"));
         String updatedAddressJson = """
                 {
@@ -142,7 +130,6 @@ class AddressControllerTest {
                 }
                 """;
 
-        //when
         mockMvc.perform(put("/api/v1/addresses/" + createdAddress.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updatedAddressJson))
@@ -151,7 +138,6 @@ class AddressControllerTest {
                 .andExpect(jsonPath("$.city").value("Los Angeles"))
                 .andExpect(jsonPath("$.postalCode").value("90001"));
 
-        //then
         Address updatedAddress = addressRepository.findById(createdAddress.getId()).get();
         assertThat(updatedAddress.getStreet()).isEqualTo("Elm St");
         assertThat(updatedAddress.getCity()).isEqualTo("Los Angeles");
@@ -161,7 +147,6 @@ class AddressControllerTest {
     @SneakyThrows
     @Test
     void updateAddress_NotFound() {
-        //given
         String updatedAddressJson = """
                 {
                     "street": "Elm St",
@@ -170,28 +155,23 @@ class AddressControllerTest {
                 }
                 """;
 
-        //when
         mockMvc.perform(put("/api/v1/addresses/999")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updatedAddressJson))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Can't update address with addressId: 999"));
 
-        //then
         assertThat(addressRepository.findAll()).isEmpty();
     }
 
     @SneakyThrows
     @Test
     void deleteAddress() {
-        //given
         AddressDTO createdAddress = addressService.create(new AddressDTO(null, "Main St", "New York", "10001"));
 
-        //when
         mockMvc.perform(delete("/api/v1/addresses/" + createdAddress.getId()))
                 .andExpect(status().isOk());
 
-        //then
         assertThat(addressRepository.findById(createdAddress.getId())).isNotPresent();
     }
 }

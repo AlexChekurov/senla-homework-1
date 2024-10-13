@@ -21,9 +21,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
 @ExtendWith(MockitoExtension.class)
-class CardServiceImplTest {
+public class CardServiceImplTest {
 
     @Mock
     private AbstractRepository<Card> cardRepository;
@@ -53,16 +52,13 @@ class CardServiceImplTest {
     }
 
     @Test
-    void testCreateCard() {
-        //given
+    public void testCreateCard() {
         when(cardMapper.toEntity(any(CardDTO.class))).thenReturn(card);
         when(cardRepository.create(any(Card.class))).thenReturn(card);
         when(cardMapper.toDto(any(Card.class))).thenReturn(cardDTO);
 
-        //when
         CardDTO createdCardDTO = cardService.create(cardDTO);
 
-        //then
         assertNotNull(createdCardDTO);
         assertEquals(cardDTO.getCardNumber(), createdCardDTO.getCardNumber());
         verify(cardMapper).toEntity(cardDTO);
@@ -71,62 +67,51 @@ class CardServiceImplTest {
     }
 
     @Test
-    void testFindById() {
-        //given
+    public void testFindById() {
         when(cardRepository.findById(1L)).thenReturn(Optional.of(card));
         when(cardMapper.toDto(card)).thenReturn(cardDTO);
 
-        //when
-        CardDTO foundCardDTO = cardService.findDtoById(1L);
+        Optional<CardDTO> foundCardDTO = cardService.findDtoById(1L);
 
-        //then
-        assertEquals(cardDTO.getId(), foundCardDTO.getId());
+        assertTrue(foundCardDTO.isPresent());
+        assertEquals(cardDTO.getId(), foundCardDTO.get().getId());
         verify(cardRepository).findById(1L);
     }
 
     @Test
-    void testUpdateCard() {
-        //given
+    public void testUpdateCard() {
+        when(cardMapper.toEntity(any(CardDTO.class))).thenReturn(card);
         when(cardRepository.update(any(Card.class))).thenReturn(card);
-        when(cardRepository.findById(card.getId())).thenReturn(Optional.ofNullable(card));
         when(cardMapper.toDto(any(Card.class))).thenReturn(cardDTO);
 
-        //when
-        CardDTO updatedCardDTO = cardService.update(card.getId(), cardDTO);
+        CardDTO updatedCardDTO = cardService.update(cardDTO);
 
-        //then
         assertNotNull(updatedCardDTO);
         assertEquals(cardDTO.getCardNumber(), updatedCardDTO.getCardNumber());
+        verify(cardMapper).toEntity(cardDTO);
         verify(cardRepository).update(card);
         verify(cardMapper).toDto(card);
     }
 
     @Test
-    void testDeleteById() {
-        //given
+    public void testDeleteById() {
         when(cardRepository.deleteById(1L)).thenReturn(true);
 
-        //when
         boolean result = cardService.deleteById(1L);
 
-        //then
         assertTrue(result);
         verify(cardRepository).deleteById(1L);
     }
 
     @Test
-    void testFindAll() {
-        //given
+    public void testFindAll() {
         when(cardRepository.findAll()).thenReturn(List.of(card));
         when(cardMapper.toDto(any(Card.class))).thenReturn(cardDTO);
 
-        //when
         List<CardDTO> allCards = cardService.findAll();
 
-        //then
         assertEquals(1, allCards.size());
         assertEquals(cardDTO.getCardNumber(), allCards.get(0).getCardNumber());
         verify(cardRepository).findAll();
     }
-
 }

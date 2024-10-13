@@ -1,6 +1,7 @@
 package com.alex.homework4example.controller;
 
 import com.alex.homework4example.dto.AccountDTO;
+import com.alex.homework4example.exception.EntityNotFoundException;
 import com.alex.homework4example.service.AccountService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,7 +30,8 @@ public class AccountController {
 
     @GetMapping("/{accountId}")
     public AccountDTO getAccountById(@PathVariable("accountId") Long accountId) {
-        return accountService.findDtoById(accountId);
+        return accountService.findDtoById(accountId)
+                .orElseThrow(() -> new EntityNotFoundException("Can't find account with id: " + accountId));
     }
 
     @PostMapping
@@ -39,7 +41,16 @@ public class AccountController {
 
     @PutMapping("/{accountId}")
     public AccountDTO updateAccount(@PathVariable("accountId") Long accountId, @RequestBody AccountDTO accountDetails) {
-        return accountService.update(accountId, accountDetails);
+        return accountService.findById(accountId)
+                .map(account -> {
+                    account.setAccountNumber(accountDetails.getAccountNumber());
+                    account.setAccountType(accountDetails.getAccountType());
+                    account.setBalance(accountDetails.getBalance());
+                    account.setCurrency(accountDetails.getCurrency());
+                    account.setIban(accountDetails.getIban());
+                    return accountService.updateEntityToDto(account);
+                })
+                .orElseThrow(() -> new EntityNotFoundException("Can't update account with accountId: " + accountId));
     }
 
     @DeleteMapping("/{accountId}")

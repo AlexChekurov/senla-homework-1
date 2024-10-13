@@ -30,7 +30,8 @@ public class UserController {
 
     @GetMapping("/{id}")
     public UserDTO getUserById(@PathVariable("id") Long id) {
-        return userService.findDtoById(id);
+        return userService.findDtoById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Can't find user with id: " + id));
     }
 
     @PostMapping
@@ -40,7 +41,13 @@ public class UserController {
 
     @PutMapping("/{id}")
     public UserDTO updateUser(@PathVariable("id") Long id, @RequestBody UserDTO userDetails) {
-        return userService.update(id, userDetails);
+        return userService.findById(id)
+                .map(user -> {
+                    user.setUsername(userDetails.getUsername());
+                    user.setPassword(userDetails.getPassword());
+                    return userService.updateEntityToDto(user);
+                })
+                .orElseThrow(() -> new EntityNotFoundException("Can't update user with id: " + id));
     }
 
     @DeleteMapping("/{id}")

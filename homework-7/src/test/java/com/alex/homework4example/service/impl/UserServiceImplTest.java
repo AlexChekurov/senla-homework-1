@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
-class UserServiceImplTest {
+public class UserServiceImplTest {
 
     @Mock
     private AbstractRepository<User> userRepository;
@@ -42,25 +42,24 @@ class UserServiceImplTest {
         user = new User();
         user.setId(1L);
         user.setUsername("testUser");
-        user.setPassword("password");
+        user.setPassword("password"); // Не забудьте учесть безопасность паролей
+        // Добавьте другие необходимые поля
 
         userDTO = new UserDTO();
         userDTO.setId(1L);
         userDTO.setUsername("testUser");
-        userDTO.setPassword("password");
+        userDTO.setPassword("password"); // Если это необходимо в DTO
+        // Добавьте другие необходимые поля
     }
 
     @Test
-    void testCreateUser() {
-        //given
+    public void testCreateUser() {
         when(userMapper.toEntity(any(UserDTO.class))).thenReturn(user);
         when(userRepository.create(any(User.class))).thenReturn(user);
         when(userMapper.toDto(any(User.class))).thenReturn(userDTO);
 
-        //when
         UserDTO createdUserDTO = userService.create(userDTO);
 
-        //then
         assertNotNull(createdUserDTO);
         assertEquals(userDTO.getUsername(), createdUserDTO.getUsername());
         verify(userMapper).toEntity(userDTO);
@@ -69,59 +68,49 @@ class UserServiceImplTest {
     }
 
     @Test
-    void testFindById() {
-        //given
+    public void testFindById() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(userMapper.toDto(user)).thenReturn(userDTO);
 
-        //when
-        UserDTO foundUserDTO = userService.findDtoById(1L);
+        Optional<UserDTO> foundUserDTO = userService.findDtoById(1L);
 
-        //then
-        assertEquals(userDTO.getId(), foundUserDTO.getId());
+        assertTrue(foundUserDTO.isPresent());
+        assertEquals(userDTO.getId(), foundUserDTO.get().getId());
         verify(userRepository).findById(1L);
     }
 
     @Test
-    void testUpdateUser() {
-        //given
-        when(userRepository.findById(user.getId())).thenReturn(Optional.ofNullable(user));
+    public void testUpdateUser() {
+        when(userMapper.toEntity(any(UserDTO.class))).thenReturn(user);
         when(userRepository.update(any(User.class))).thenReturn(user);
         when(userMapper.toDto(any(User.class))).thenReturn(userDTO);
 
-        //when
-        UserDTO updatedUserDTO = userService.update(user.getId(), userDTO);
+        UserDTO updatedUserDTO = userService.update(userDTO);
 
-        //then
         assertNotNull(updatedUserDTO);
         assertEquals(userDTO.getUsername(), updatedUserDTO.getUsername());
+        verify(userMapper).toEntity(userDTO);
         verify(userRepository).update(user);
         verify(userMapper).toDto(user);
     }
 
     @Test
-    void testDeleteById() {
-        //given
+    public void testDeleteById() {
         when(userRepository.deleteById(1L)).thenReturn(true);
 
-        //when
         boolean result = userService.deleteById(1L);
 
-        //then
         assertTrue(result);
         verify(userRepository).deleteById(1L);
     }
 
     @Test
-    void testFindAll() {
-        //given
+    public void testFindAll() {
         when(userRepository.findAll()).thenReturn(List.of(user));
         when(userMapper.toDto(any(User.class))).thenReturn(userDTO);
 
-        //when
         List<UserDTO> allUsers = userService.findAll();
 
-        //then
         assertEquals(1, allUsers.size());
         assertEquals(userDTO.getUsername(), allUsers.get(0).getUsername());
         verify(userRepository).findAll();
