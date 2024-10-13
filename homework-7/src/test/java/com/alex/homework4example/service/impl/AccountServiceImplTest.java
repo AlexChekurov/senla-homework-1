@@ -20,11 +20,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
-public class AccountServiceImplTest {
+class AccountServiceImplTest {
 
     @Mock
     private AbstractRepository<Account> repository;
@@ -50,16 +52,18 @@ public class AccountServiceImplTest {
     }
 
     @Test
-    public void testCreate() {
+    void testCreate() {
+        //given
         AccountDTO dto = new AccountDTO();
-
         Account account = new Account();
         when(mapper.toEntity(dto)).thenReturn(account);
         when(repository.create(account)).thenReturn(account);
         when(mapper.toDto(account)).thenReturn(dto);
 
+        //when
         AccountDTO createdDto = accountService.create(dto);
 
+        //then
         assertNotNull(createdDto);
         verify(mapper).toEntity(dto);
         verify(repository).create(account);
@@ -67,64 +71,74 @@ public class AccountServiceImplTest {
     }
 
     @Test
-    public void testTransferMoney_Success() {
+    void testTransferMoney_Success() {
+        //given
         when(repository.update(any(Account.class))).thenReturn(fromAccount);
 
+        //when
         accountService.transferMoney(fromAccount, toAccount, BigDecimal.valueOf(200));
 
+        //then
         assertEquals(BigDecimal.valueOf(800), fromAccount.getBalance());
         assertEquals(BigDecimal.valueOf(700), toAccount.getBalance());
-
         verify(repository).update(fromAccount);
         verify(repository).update(toAccount);
     }
 
     @Test
-    public void testTransferMoney_InsufficientFunds() {
-        InsufficientFundsException exception = assertThrows(InsufficientFundsException.class, () -> {
-            accountService.transferMoney(fromAccount, toAccount, BigDecimal.valueOf(1200));
-        });
+    void testTransferMoney_InsufficientFunds() {
+        //when
+        InsufficientFundsException exception = assertThrows(
+                InsufficientFundsException.class,
+                () -> accountService.transferMoney(fromAccount, toAccount, BigDecimal.valueOf(1200)));
 
+        //then
         assertEquals("Not enough funds in the source account", exception.getMessage());
         verify(repository, never()).update(any(Account.class));
     }
 
     @Test
-    public void testFindById() {
+    void testFindById() {
+        //given
         when(repository.findById(1L)).thenReturn(Optional.of(fromAccount));
         when(mapper.toDto(fromAccount)).thenReturn(new AccountDTO());
 
-        Optional<AccountDTO> foundDto = accountService.findDtoById(1L);
+        //when
+        accountService.findDtoById(1L);
 
-        assertTrue(foundDto.isPresent());
+        //then
         verify(repository).findById(1L);
         verify(mapper).toDto(fromAccount);
     }
 
     @Test
-    public void testUpdate() {
+    void testUpdate() {
+        //given
         AccountDTO dto = new AccountDTO();
-        // Установите значения для dto
-
         Account account = new Account();
-        when(mapper.toEntity(dto)).thenReturn(account);
+        account.setId(1L);
+        when(repository.findById(account.getId())).thenReturn(Optional.of(account));
         when(repository.update(account)).thenReturn(account);
         when(mapper.toDto(account)).thenReturn(dto);
 
-        AccountDTO updatedDto = accountService.update(dto);
+
+        AccountDTO updatedDto = accountService.update(account.getId(), dto);
+
 
         assertNotNull(updatedDto);
-        verify(mapper).toEntity(dto);
         verify(repository).update(account);
         verify(mapper).toDto(account);
     }
 
     @Test
-    public void testDeleteById() {
+    void testDeleteById() {
+        //given
         when(repository.deleteById(1L)).thenReturn(true);
 
+        //when
         boolean result = accountService.deleteById(1L);
 
+        //then
         assertTrue(result);
         verify(repository).deleteById(1L);
     }

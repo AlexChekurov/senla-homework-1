@@ -23,8 +23,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+
 @ExtendWith(MockitoExtension.class)
-public class TransactionServiceImplTest {
+class TransactionServiceImplTest {
 
     @Mock
     private AbstractRepository<Transaction> transactionRepository;
@@ -39,7 +40,7 @@ public class TransactionServiceImplTest {
     private TransactionDTO transactionDTO;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         transaction = new Transaction();
         transaction.setId(1L);
         transaction.setAmount(BigDecimal.valueOf(100.00));
@@ -54,13 +55,16 @@ public class TransactionServiceImplTest {
     }
 
     @Test
-    public void testCreateTransaction() {
+    void testCreateTransaction() {
+        //given
         when(transactionMapper.toEntity(any(TransactionDTO.class))).thenReturn(transaction);
         when(transactionRepository.create(any(Transaction.class))).thenReturn(transaction);
         when(transactionMapper.toDto(any(Transaction.class))).thenReturn(transactionDTO);
 
+        //when
         TransactionDTO createdTransactionDTO = transactionService.create(transactionDTO);
 
+        //then
         assertNotNull(createdTransactionDTO);
         assertEquals(transactionDTO.getAmount(), createdTransactionDTO.getAmount());
         assertEquals(transactionDTO.getTransactionDate(), createdTransactionDTO.getTransactionDate());
@@ -71,55 +75,67 @@ public class TransactionServiceImplTest {
     }
 
     @Test
-    public void testFindById() {
+    void testFindById() {
+        //given
         when(transactionRepository.findById(1L)).thenReturn(Optional.of(transaction));
         when(transactionMapper.toDto(transaction)).thenReturn(transactionDTO);
 
-        Optional<TransactionDTO> foundTransactionDTO = transactionService.findDtoById(1L);
+        //when
+        TransactionDTO foundTransactionDTO = transactionService.findDtoById(1L);
 
-        assertTrue(foundTransactionDTO.isPresent());
-        assertEquals(transactionDTO.getId(), foundTransactionDTO.get().getId());
+        //then
+        assertEquals(transactionDTO.getId(), foundTransactionDTO.getId());
         verify(transactionRepository).findById(1L);
     }
 
     @Test
-    public void testUpdateTransaction() {
-        when(transactionMapper.toEntity(any(TransactionDTO.class))).thenReturn(transaction);
+    void testUpdateTransaction() {
+        //given
+        when(transactionRepository.findById(transaction.getId()))
+                .thenReturn(Optional.ofNullable(transaction));
         when(transactionRepository.update(any(Transaction.class))).thenReturn(transaction);
         when(transactionMapper.toDto(any(Transaction.class))).thenReturn(transactionDTO);
 
-        TransactionDTO updatedTransactionDTO = transactionService.update(transactionDTO);
+        //when
+        TransactionDTO updatedTransactionDTO = transactionService.update(transaction.getId(), transactionDTO);
 
+        //then
         assertNotNull(updatedTransactionDTO);
         assertEquals(transactionDTO.getAmount(), updatedTransactionDTO.getAmount());
         assertEquals(transactionDTO.getTransactionDate(), updatedTransactionDTO.getTransactionDate());
         assertEquals(transactionDTO.getCurrency(), updatedTransactionDTO.getCurrency());
-        verify(transactionMapper).toEntity(transactionDTO);
         verify(transactionRepository).update(transaction);
         verify(transactionMapper).toDto(transaction);
     }
 
     @Test
-    public void testDeleteById() {
+    void testDeleteById() {
+        //given
         when(transactionRepository.deleteById(1L)).thenReturn(true);
 
+        //when
         boolean result = transactionService.deleteById(1L);
 
+        //then
         assertTrue(result);
         verify(transactionRepository).deleteById(1L);
     }
 
     @Test
-    public void testFindAll() {
+    void testFindAll() {
+        //given
         when(transactionRepository.findAll()).thenReturn(List.of(transaction));
         when(transactionMapper.toDto(any(Transaction.class))).thenReturn(transactionDTO);
 
+        //when
         List<TransactionDTO> allTransactions = transactionService.findAll();
 
+        //then
         assertEquals(1, allTransactions.size());
         assertEquals(transactionDTO.getAmount(), allTransactions.get(0).getAmount());
         assertEquals(transactionDTO.getTransactionDate(), allTransactions.get(0).getTransactionDate());
         assertEquals(transactionDTO.getCurrency(), allTransactions.get(0).getCurrency());
         verify(transactionRepository).findAll();
     }
+
 }

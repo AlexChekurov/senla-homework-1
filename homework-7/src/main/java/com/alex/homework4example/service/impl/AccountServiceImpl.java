@@ -2,6 +2,7 @@ package com.alex.homework4example.service.impl;
 
 import com.alex.homework4example.dto.AccountDTO;
 import com.alex.homework4example.entity.Account;
+import com.alex.homework4example.exception.EntityNotFoundException;
 import com.alex.homework4example.exception.InsufficientFundsException;
 import com.alex.homework4example.mapper.CommonMapper;
 import com.alex.homework4example.repository.AbstractRepository;
@@ -30,4 +31,19 @@ public class AccountServiceImpl extends AbstractCrudService<Account, AccountDTO>
         repository.update(fromAccount);
         repository.update(toAccount);
     }
+
+    @Override
+    public AccountDTO update(Long id, AccountDTO dto) {
+        return repository.findById(id)
+                .map(account -> {
+                    account.setAccountNumber(dto.getAccountNumber());
+                    account.setAccountType(dto.getAccountType());
+                    account.setBalance(dto.getBalance());
+                    account.setCurrency(dto.getCurrency());
+                    account.setIban(dto.getIban());
+                    return updateEntityToDto(account);
+                })
+                .orElseThrow(() -> new EntityNotFoundException("Can't update account with id: " + id));
+    }
+
 }

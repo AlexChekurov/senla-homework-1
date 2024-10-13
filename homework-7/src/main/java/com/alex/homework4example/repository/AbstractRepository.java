@@ -1,6 +1,7 @@
 package com.alex.homework4example.repository;
 
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaDelete;
@@ -12,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+
 
 @RequiredArgsConstructor
 public abstract class AbstractRepository<T> {
@@ -44,10 +46,11 @@ public abstract class AbstractRepository<T> {
         query.select(root).where(condition);
 
         // Execute the query and retrieve results
-        List<T> results = entityManager.createQuery(query).getResultList();
-
-        // Return an Optional containing the found entity, or empty if not found
-        return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
+        try {
+            return Optional.ofNullable(entityManager.createQuery(query).getSingleResult());
+        } catch (NoResultException e) {
+            return Optional.empty();
+        }
     }
 
     @Transactional
@@ -71,7 +74,6 @@ public abstract class AbstractRepository<T> {
         }
         return false;
     }
-
 
     protected CriteriaBuilder getCriteriaBuilder() {
         return entityManager.getCriteriaBuilder();

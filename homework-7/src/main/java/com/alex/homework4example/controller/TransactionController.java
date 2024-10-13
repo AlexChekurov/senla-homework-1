@@ -30,8 +30,7 @@ public class TransactionController {
 
     @GetMapping("/{id}")
     public TransactionDTO getTransactionById(@PathVariable("id") Long id) {
-        return transactionService.findDtoById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Can't find transaction with id: " + id));
+        return transactionService.findDtoById(id);
     }
 
     @PostMapping
@@ -43,14 +42,7 @@ public class TransactionController {
     public TransactionDTO updateTransaction(
             @PathVariable("id") Long id,
             @RequestBody TransactionDTO transactionDetails) {
-        return transactionService.findById(id)
-                .map(transaction -> {
-                    transaction.setAmount(transactionDetails.getAmount());
-                    transaction.setTransactionDate(transactionDetails.getTransactionDate());
-                    transaction.setCurrency(transactionDetails.getCurrency());
-                    return transactionService.updateEntityToDto(transaction);
-                })
-                .orElseThrow(() -> new EntityNotFoundException("Can't update transaction with id: " + id));
+        return transactionService.update(id, transactionDetails);
     }
 
     @DeleteMapping("/{id}")

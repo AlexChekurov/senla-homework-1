@@ -6,6 +6,7 @@ import liquibase.integration.spring.SpringLiquibase;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -38,17 +39,29 @@ public class DataBaseConfig {
     private boolean showSql;
     @Value("${spring.profiles.active}")
     private String activeProfile;
+
     @Bean
-    public DataSource dataSource(
+    @Profile("prod")
+    public DataSource prodDataSource(
     ) {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setUrl(url);
         dataSource.setUsername(username);
         dataSource.setPassword(password);
         dataSource.setDriverClassName(driverClassName);
-        if("prod".equals(activeProfile)) {
-            dataSource.setSchema(schema);
-        }
+        dataSource.setSchema(schema);
+        return dataSource;
+    }
+
+    @Bean
+    @Profile("!prod")
+    public DataSource nonProdDataSource(
+    ) {
+        DriverManagerDataSource dataSource = new DriverManagerDataSource();
+        dataSource.setUrl(url);
+        dataSource.setUsername(username);
+        dataSource.setPassword(password);
+        dataSource.setDriverClassName(driverClassName);
         return dataSource;
     }
 

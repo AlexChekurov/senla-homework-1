@@ -1,7 +1,6 @@
 package com.alex.homework4example.controller;
 
 import com.alex.homework4example.dto.AddressDTO;
-import com.alex.homework4example.exception.EntityNotFoundException;
 import com.alex.homework4example.service.AddressService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,8 +29,7 @@ public class AddressController {
 
     @GetMapping("/{addressId}")
     public AddressDTO getAddressById(@PathVariable("addressId") Long id) {
-        return addressService.findDtoById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Can't find address with id: " + id));
+        return addressService.findDtoById(id);
     }
 
     @PostMapping
@@ -41,14 +39,7 @@ public class AddressController {
 
     @PutMapping("/{addressId}")
     public AddressDTO updateAddress(@PathVariable("addressId") Long addressId, @RequestBody AddressDTO addressDetails) {
-        return addressService.findById(addressId)
-                .map(address -> {
-                    address.setStreet(addressDetails.getStreet());
-                    address.setCity(addressDetails.getCity());
-                    address.setPostalCode(addressDetails.getPostalCode());
-                    return addressService.updateEntityToDto(address);
-                })
-                .orElseThrow(() -> new EntityNotFoundException("Can't update address with addressId: " + addressId));
+        return addressService.update(addressId, addressDetails);
     }
 
     @DeleteMapping("/{addressId}")

@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringJUnitConfig(classes = { AppConfig.class, DataBaseConfig.class })
 @WebAppConfiguration
 @TestPropertySource(locations = "classpath:application-test.properties")
-public class TransactionRepositoryTest {
+class TransactionRepositoryTest {
 
     @Autowired
     private TransactionRepository transactionRepository;
@@ -43,10 +43,76 @@ public class TransactionRepositoryTest {
     private CustomerRepository customerRepository;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         transactionRepository.deleteAll();
         accountRepository.deleteAll();
         customerRepository.deleteAll();
+    }
+
+    @Test
+    void testCreateTransaction() {
+        //when
+        Transaction transaction = createTestTransaction();
+
+        //then
+        assertNotNull(transaction.getId(), "Transaction ID should not be null after creation");
+    }
+
+    @Test
+    void testFindById() {
+        //given
+        Transaction transaction = createTestTransaction();
+
+        //when
+        Optional<Transaction> foundTransaction = transactionRepository.findById(transaction.getId());
+
+        //then
+        assertTrue(foundTransaction.isPresent(), "Transaction should be found");
+        assertEquals(transaction.getId(), foundTransaction.get().getId(), "The IDs should match");
+    }
+
+    @Test
+    void testUpdateTransaction() {
+        //given
+        Transaction transaction = createTestTransaction();
+        transaction.setAmount(BigDecimal.valueOf(200.00));
+        transactionRepository.update(transaction);
+
+        //when
+        Optional<Transaction> updatedTransaction = transactionRepository.findById(transaction.getId());
+
+        //then
+        assertTrue(updatedTransaction.isPresent(), "Transaction should be found after update");
+        assertEquals(0, updatedTransaction.get().getAmount().compareTo(BigDecimal.valueOf(200.00)),
+                "Transaction amount should be updated");
+    }
+
+    @Test
+    void testDeleteTransaction() {
+        //given
+        Transaction transaction = createTestTransaction();
+        Optional<Transaction> foundTransactionBeforeDeletion = transactionRepository.findById(transaction.getId());
+        assertTrue(foundTransactionBeforeDeletion.isPresent(), "Transaction should exist before deletion");
+
+        //when
+        transactionRepository.deleteById(transaction.getId());
+
+        //then
+        Optional<Transaction> deletedTransaction = transactionRepository.findById(transaction.getId());
+        assertFalse(deletedTransaction.isPresent(), "Transaction should be deleted and not found in the database");
+    }
+
+    @Test
+    void testFindAllTransactions() {
+        //given
+        createTestTransaction();
+        createTestTransaction();
+
+        //when
+        List<Transaction> transactions = transactionRepository.findAll();
+
+        //then
+        assertEquals(2, transactions.size(), "There should be two transactions in the database");
     }
 
     private Customer createTestCustomer() {
@@ -82,59 +148,11 @@ public class TransactionRepositoryTest {
         transaction.setCurrency("USD");
 
         Set<Account> accounts = new HashSet<>();
-        accounts.add(createTestAccount()); // Добавляем один тестовый аккаунт
+        accounts.add(createTestAccount());
         transaction.setAccounts(accounts);
 
         transactionRepository.create(transaction);
         return transaction;
-    }
-
-    @Test
-    public void testCreateTransaction() {
-        Transaction transaction = createTestTransaction();
-        assertNotNull(transaction.getId(), "Transaction ID should not be null after creation");
-    }
-
-    @Test
-    public void testFindById() {
-        Transaction transaction = createTestTransaction();
-        Optional<Transaction> foundTransaction = transactionRepository.findById(transaction.getId());
-        assertTrue(foundTransaction.isPresent(), "Transaction should be found");
-        assertEquals(transaction.getId(), foundTransaction.get().getId(), "The IDs should match");
-    }
-
-    @Test
-    public void testUpdateTransaction() {
-        Transaction transaction = createTestTransaction();
-        transaction.setAmount(BigDecimal.valueOf(200.00));
-        transactionRepository.update(transaction);
-
-        Optional<Transaction> updatedTransaction = transactionRepository.findById(transaction.getId());
-        assertTrue(updatedTransaction.isPresent(), "Transaction should be found after update");
-
-        assertEquals(0, updatedTransaction.get().getAmount().compareTo(BigDecimal.valueOf(200.00)),
-                "Transaction amount should be updated");
-    }
-
-    @Test
-    public void testDeleteTransaction() {
-        Transaction transaction = createTestTransaction();
-
-        Optional<Transaction> foundTransactionBeforeDeletion = transactionRepository.findById(transaction.getId());
-        assertTrue(foundTransactionBeforeDeletion.isPresent(), "Transaction should exist before deletion");
-
-        transactionRepository.deleteById(transaction.getId());
-
-        Optional<Transaction> deletedTransaction = transactionRepository.findById(transaction.getId());
-        assertFalse(deletedTransaction.isPresent(), "Transaction should be deleted and not found in the database");
-    }
-
-    @Test
-    public void testFindAllTransactions() {
-        createTestTransaction();
-        createTestTransaction();
-        List<Transaction> transactions = transactionRepository.findAll();
-        assertEquals(2, transactions.size(), "There should be two transactions in the database");
     }
 
 }

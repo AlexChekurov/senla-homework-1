@@ -66,12 +66,14 @@ class CustomerControllerTest {
     @SneakyThrows
     @Test
     void createCustomer() {
+        //given
         CustomerDTO customerDTO = new CustomerDTO();
         customerDTO.setFirstName("John");
         customerDTO.setLastName("Doe");
         customerDTO.setEmail("john.doe@example.com");
         customerDTO.setPhone("1234567890");
 
+        //when
         MvcResult result = mockMvc.perform(post("/api/v1/customers")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(customerDTO)))
@@ -79,6 +81,7 @@ class CustomerControllerTest {
                 .andExpect(jsonPath("$.firstName").value("John"))
                 .andReturn();
 
+        //then
         var createdCustomerDto = objectMapper.readValue(result.getResponse().getContentAsString(), CustomerDTO.class);
         Customer savedCustomer = customerRepository.findById(createdCustomerDto.getId()).orElseThrow();
         assertThat(savedCustomer.getFirstName()).isEqualTo("John");
@@ -87,6 +90,7 @@ class CustomerControllerTest {
     @SneakyThrows
     @Test
     void getAllCustomers() {
+        //given
         Customer customer = new Customer();
         customer.setFirstName("John");
         customer.setLastName("Doe");
@@ -94,6 +98,7 @@ class CustomerControllerTest {
         customer.setPhone("1234567890");
         customerRepository.create(customer);
 
+        //when, then
         mockMvc.perform(get("/api/v1/customers"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].firstName").value("John"));
@@ -102,6 +107,7 @@ class CustomerControllerTest {
     @SneakyThrows
     @Test
     void updateCustomer() {
+        //given
         Customer customer = new Customer();
         customer.setFirstName("John");
         customer.setLastName("Doe");
@@ -115,12 +121,14 @@ class CustomerControllerTest {
         updateCustomerDTO.setEmail("jane.doe@example.com");
         updateCustomerDTO.setPhone("0987654321");
 
+        //when
         mockMvc.perform(put("/api/v1/customers/" + customer.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateCustomerDTO)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName").value("Jane"));
 
+        //then
         Customer updatedCustomer = customerRepository.findById(customer.getId()).orElseThrow();
         assertThat(updatedCustomer.getFirstName()).isEqualTo("Jane");
     }
@@ -128,6 +136,7 @@ class CustomerControllerTest {
     @SneakyThrows
     @Test
     void deleteCustomer() {
+        //given
         Customer customer = new Customer();
         customer.setFirstName("John");
         customer.setLastName("Doe");
@@ -135,15 +144,18 @@ class CustomerControllerTest {
         customer.setPhone("1234567890");
         customer = customerRepository.create(customer);
 
+        //when
         mockMvc.perform(delete("/api/v1/customers/" + customer.getId()))
                 .andExpect(status().isOk());
 
+        //then
         assertThat(customerRepository.findById(customer.getId())).isEmpty();
     }
 
     @SneakyThrows
     @Test
     void getCustomerById_NotFound() {
+        //when, then
         mockMvc.perform(get("/api/v1/customers/999"))
                 .andExpect(status().isNotFound());
     }

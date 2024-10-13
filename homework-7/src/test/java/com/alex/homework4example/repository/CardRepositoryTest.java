@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringJUnitConfig(classes = {AppConfig.class, DataBaseConfig.class})
 @WebAppConfiguration
 @TestPropertySource(locations = "classpath:application-test.properties")
-public class CardRepositoryTest {
+class CardRepositoryTest {
 
     @Autowired
     private CardRepository cardRepository;
@@ -43,10 +43,75 @@ public class CardRepositoryTest {
     private CustomerRepository customerRepository;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         cardRepository.deleteAll();
         accountRepository.deleteAll();
         customerRepository.deleteAll();
+    }
+
+    @Test
+    void testCreateCard() {
+        //when
+        Card card = createTestCard();
+
+        //then
+        assertNotNull(card.getId(), "Card ID should not be null after creation");
+    }
+
+    @Test
+    void testFindById() {
+        //given
+        Card card = createTestCard();
+
+        //when
+        Optional<Card> foundCard = cardRepository.findById(card.getId());
+
+        //then
+        assertTrue(foundCard.isPresent(), "Card should be found");
+        assertEquals(card.getId(), foundCard.get().getId(), "The IDs should match");
+    }
+
+    @Test
+    void testUpdateCard() {
+        //given
+        Card card = createTestCard();
+        card.setCardType("MasterCard");
+        cardRepository.update(card);
+
+        //when
+        Optional<Card> updatedCard = cardRepository.findById(card.getId());
+
+        //then
+        assertTrue(updatedCard.isPresent(), "Card should be found after update");
+        assertEquals("MasterCard", updatedCard.get().getCardType(), "Card type should be updated");
+    }
+
+    @Test
+    void testDeleteCard() {
+        //given
+        Card card = createTestCard();
+        Optional<Card> foundCardBeforeDeletion = cardRepository.findById(card.getId());
+        assertTrue(foundCardBeforeDeletion.isPresent(), "Card should exist before deletion");
+
+        //when
+        cardRepository.deleteById(card.getId());
+
+        //then
+        Optional<Card> deletedCard = cardRepository.findById(card.getId());
+        assertFalse(deletedCard.isPresent(), "Card should be deleted and not found in the database");
+    }
+
+    @Test
+    void testFindAllCards() {
+        //given
+        createTestCard();
+        createTestCard();
+
+        //when
+        List<Card> cards = cardRepository.findAll();
+
+        //then
+        assertEquals(2, cards.size(), "There should be two cards in the database");
     }
 
     private Customer createTestCustomer() {
@@ -90,51 +155,5 @@ public class CardRepositoryTest {
 
         cardRepository.create(card);
         return card;
-    }
-
-    @Test
-    public void testCreateCard() {
-        Card card = createTestCard();
-        assertNotNull(card.getId(), "Card ID should not be null after creation");
-    }
-
-    @Test
-    public void testFindById() {
-        Card card = createTestCard();
-        Optional<Card> foundCard = cardRepository.findById(card.getId());
-        assertTrue(foundCard.isPresent(), "Card should be found");
-        assertEquals(card.getId(), foundCard.get().getId(), "The IDs should match");
-    }
-
-    @Test
-    public void testUpdateCard() {
-        Card card = createTestCard();
-        card.setCardType("MasterCard");
-        cardRepository.update(card);
-
-        Optional<Card> updatedCard = cardRepository.findById(card.getId());
-        assertTrue(updatedCard.isPresent(), "Card should be found after update");
-        assertEquals("MasterCard", updatedCard.get().getCardType(), "Card type should be updated");
-    }
-
-    @Test
-    public void testDeleteCard() {
-        Card card = createTestCard();
-
-        Optional<Card> foundCardBeforeDeletion = cardRepository.findById(card.getId());
-        assertTrue(foundCardBeforeDeletion.isPresent(), "Card should exist before deletion");
-
-        cardRepository.deleteById(card.getId());
-
-        Optional<Card> deletedCard = cardRepository.findById(card.getId());
-        assertFalse(deletedCard.isPresent(), "Card should be deleted and not found in the database");
-    }
-
-    @Test
-    public void testFindAllCards() {
-        createTestCard();
-        createTestCard();
-        List<Card> cards = cardRepository.findAll();
-        assertEquals(2, cards.size(), "There should be two cards in the database");
     }
 }

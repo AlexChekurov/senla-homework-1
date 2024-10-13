@@ -30,8 +30,7 @@ public class RoleController {
 
     @GetMapping("/{id}")
     public RoleDTO getRoleById(@PathVariable("id") Long id) {
-        return roleService.findDtoById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Can't find role with id :" + id));
+        return roleService.findDtoById(id);
     }
 
     @PostMapping
@@ -41,12 +40,7 @@ public class RoleController {
 
     @PutMapping("/{id}")
     public RoleDTO updateRole(@PathVariable("id") Long id, @RequestBody RoleDTO roleDetails) {
-        return roleService.findById(id)
-                .map(role -> {
-                    role.setName(roleDetails.getName());
-                    return roleService.updateEntityToDto(role);
-                })
-                .orElseThrow(() -> new EntityNotFoundException("Can't update role with id :" + id));
+        return roleService.update(id, roleDetails);
     }
 
     @DeleteMapping("/{id}")

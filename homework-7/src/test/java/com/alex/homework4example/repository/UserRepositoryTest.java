@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @SpringJUnitConfig(classes = { AppConfig.class, DataBaseConfig.class })
 @WebAppConfiguration
 @TestPropertySource(locations = "classpath:application-test.properties")
-public class UserRepositoryTest {
+class UserRepositoryTest {
 
     @Autowired
     private UserRepository userRepository;
@@ -36,14 +36,79 @@ public class UserRepositoryTest {
     private RoleRepository roleRepository;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         userRepository.deleteAll();
         roleRepository.deleteAll();
     }
 
+    @Test
+    void testCreateUser() {
+        //when
+        User user = createTestUser();
+
+        //then
+        assertNotNull(user.getId(), "User ID should not be null after creation");
+    }
+
+    @Test
+    void testFindById() {
+        //given
+        User user = createTestUser();
+
+        //when
+        Optional<User> foundUser = userRepository.findById(user.getId());
+
+        //then
+        assertTrue(foundUser.isPresent(), "User should be found");
+        assertEquals(user.getId(), foundUser.get().getId(), "The IDs should match");
+    }
+
+    @Test
+    void testUpdateUser() {
+        //given
+        User user = createTestUser();
+        user.setUsername("UpdatedUsername");
+        userRepository.update(user);
+
+        //when
+        Optional<User> updatedUser = userRepository.findById(user.getId());
+
+        //then
+        assertTrue(updatedUser.isPresent(), "User should be found after update");
+        assertEquals("UpdatedUsername", updatedUser.get().getUsername(), "Username should be updated");
+    }
+
+    @Test
+    void testDeleteUser() {
+        //given
+        User user = createTestUser();
+        Optional<User> foundUserBeforeDeletion = userRepository.findById(user.getId());
+        assertTrue(foundUserBeforeDeletion.isPresent(), "User should exist before deletion");
+
+        //when
+        userRepository.deleteById(user.getId());
+
+        //then
+        Optional<User> deletedUser = userRepository.findById(user.getId());
+        assertFalse(deletedUser.isPresent(), "User should be deleted and not found in the database");
+    }
+
+    @Test
+    void testFindAllUsers() {
+        //given
+        createTestUser();
+        createTestUser();
+
+        //when
+        List<User> users = userRepository.findAll();
+
+        //then
+        assertEquals(2, users.size(), "There should be two users in the database");
+    }
+
     private Role createTestRole() {
         Role role = new Role();
-        role.setName("ROLE_" + UUID.randomUUID().toString());
+        role.setName("ROLE_" + UUID.randomUUID());
         roleRepository.create(role);
         return role;
     }
@@ -56,52 +121,6 @@ public class UserRepositoryTest {
         user.setPassword(UUID.randomUUID().toString());
         userRepository.create(user);
         return user;
-    }
-
-    @Test
-    public void testCreateUser() {
-        User user = createTestUser();
-        assertNotNull(user.getId(), "User ID should not be null after creation");
-    }
-
-    @Test
-    public void testFindById() {
-        User user = createTestUser();
-        Optional<User> foundUser = userRepository.findById(user.getId());
-        assertTrue(foundUser.isPresent(), "User should be found");
-        assertEquals(user.getId(), foundUser.get().getId(), "The IDs should match");
-    }
-
-    @Test
-    public void testUpdateUser() {
-        User user = createTestUser();
-        user.setUsername("UpdatedUsername");
-        userRepository.update(user);
-
-        Optional<User> updatedUser = userRepository.findById(user.getId());
-        assertTrue(updatedUser.isPresent(), "User should be found after update");
-        assertEquals("UpdatedUsername", updatedUser.get().getUsername(), "Username should be updated");
-    }
-
-    @Test
-    public void testDeleteUser() {
-        User user = createTestUser();
-
-        Optional<User> foundUserBeforeDeletion = userRepository.findById(user.getId());
-        assertTrue(foundUserBeforeDeletion.isPresent(), "User should exist before deletion");
-
-        userRepository.deleteById(user.getId());
-
-        Optional<User> deletedUser = userRepository.findById(user.getId());
-        assertFalse(deletedUser.isPresent(), "User should be deleted and not found in the database");
-    }
-
-    @Test
-    public void testFindAllUsers() {
-        createTestUser();
-        createTestUser();
-        List<User> users = userRepository.findAll();
-        assertEquals(2, users.size(), "There should be two users in the database");
     }
 
 }

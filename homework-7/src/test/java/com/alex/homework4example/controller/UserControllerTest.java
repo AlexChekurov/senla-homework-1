@@ -72,6 +72,7 @@ class UserControllerTest {
     @SneakyThrows
     @Test
     void getAllUsers() {
+        //given
         Role role = new Role();
         role.setName("Admin");
         roleRepository.create(role);
@@ -88,6 +89,7 @@ class UserControllerTest {
         user2.setRole(role);
         userRepository.create(user2);
 
+        //when, then
         mockMvc.perform(get("/api/v1/users"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].username").value("alex"))
@@ -97,6 +99,7 @@ class UserControllerTest {
     @SneakyThrows
     @Test
     void getUserById() {
+        //given
         Role role = new Role();
         role.setName("Admin");
         roleRepository.create(role);
@@ -107,6 +110,7 @@ class UserControllerTest {
         user.setRole(role);
         userRepository.create(user);
 
+        //when, then
         mockMvc.perform(get("/api/v1/users/" + user.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value("alex"));
@@ -115,10 +119,12 @@ class UserControllerTest {
     @SneakyThrows
     @Test
     void createUser() {
+        //given
         Role role = new Role();
         role.setName("Admin");
         roleRepository.create(role);
 
+        //when
         MvcResult result = mockMvc.perform(post("/api/v1/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"username\":\"alex\", \"password\":\"password\", \"role\":{\"id\":" + role.getId() + ", \"name\":\"Admin\"}}"))
@@ -126,6 +132,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.username").value("alex"))
                 .andReturn();
 
+        //then
         var userDto = objectMapper.readValue(result.getResponse().getContentAsString(), UserDTO.class);
         User savedUser = userRepository.findById(userDto.getId()).orElseThrow();
         assertThat(savedUser.getRole().getId()).isEqualTo(role.getId());
@@ -134,6 +141,7 @@ class UserControllerTest {
     @SneakyThrows
     @Test
     void updateUser() {
+        //given
         Role role = new Role();
         role.setName("Admin");
         roleRepository.create(role);
@@ -147,13 +155,14 @@ class UserControllerTest {
         Role newRole = new Role();
         newRole.setName("User");
         roleRepository.create(newRole);
-
+        //when
         mockMvc.perform(put("/api/v1/users/" + user.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"username\":\"alex_updated\", \"password\":\"new_password\", \"role\":{\"id\":" + newRole.getId() + ", \"name\":\"User\"}}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value("alex_updated"));
 
+        //then
         User updatedUser = userRepository.findById(user.getId()).orElseThrow();
         assertThat(updatedUser.getUsername()).isEqualTo("alex_updated");
     }
@@ -161,25 +170,29 @@ class UserControllerTest {
     @SneakyThrows
     @Test
     void deleteUser() {
+        //given
         Role role = new Role();
         role.setName("Admin");
-        roleRepository.create(role);  // Используем метод create из AbstractRepository
+        roleRepository.create(role);
 
         User user = new User();
         user.setUsername("alex");
         user.setPassword("password");
         user.setRole(role);
-        userRepository.create(user);  // Используем метод create из AbstractRepository
+        userRepository.create(user);
 
+        //when
         mockMvc.perform(delete("/api/v1/users/" + user.getId()))
                 .andExpect(status().isOk());
 
+        //then
         assertThat(userRepository.findById(user.getId())).isEmpty();
     }
 
     @SneakyThrows
     @Test
     void getUserById_NotFound() {
+        //when, then
         mockMvc.perform(get("/api/v1/users/999"))
                 .andExpect(status().isNotFound());
     }

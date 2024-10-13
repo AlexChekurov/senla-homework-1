@@ -74,6 +74,7 @@ class AccountControllerTest {
     @SneakyThrows
     @Test
     void createAccount() {
+        //given
         Customer customer = new Customer();
         customer.setFirstName("John");
         customer.setLastName("Doe");
@@ -81,6 +82,7 @@ class AccountControllerTest {
         customer.setPhone("1234567890");
         customerRepository.create(customer);
 
+        //when
         MvcResult result = mockMvc.perform(post("/api/v1/accounts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"accountNumber\":\"1234567890123456\", \"accountType\":\"SAVINGS\", " +
@@ -91,6 +93,8 @@ class AccountControllerTest {
                 .andExpect(jsonPath("$.accountNumber").value("1234567890123456"))
                 .andReturn();
 
+
+        //then
         var accountDto = objectMapper.readValue(result.getResponse().getContentAsString(), AccountDTO.class);
         Account savedAccount = accountRepository.findById(accountDto.getId()).orElseThrow();
         assertThat(savedAccount.getCustomer().getId()).isEqualTo(customer.getId());
@@ -99,6 +103,7 @@ class AccountControllerTest {
     @SneakyThrows
     @Test
     void getAllAccounts() {
+        //given
         Customer customer = new Customer();
         customer.setFirstName("John");
         customer.setLastName("Doe");
@@ -116,6 +121,7 @@ class AccountControllerTest {
         account1.setCustomer(customer);
         accountRepository.create(account1);
 
+        //when, then
         mockMvc.perform(get("/api/v1/accounts"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].accountNumber").value("1234567890123456"));
@@ -124,6 +130,7 @@ class AccountControllerTest {
     @SneakyThrows
     @Test
     void updateAccount() {
+        //given
         Customer customer = new Customer();
         customer.setFirstName("John");
         customer.setLastName("Doe");
@@ -141,6 +148,7 @@ class AccountControllerTest {
         account.setCustomer(customer);
         accountRepository.create(account);
 
+        //when
         mockMvc.perform(put("/api/v1/accounts/" + account.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"accountNumber\":\"6543210987654321\", \"accountType\":\"CHECKING\", " +
@@ -149,6 +157,7 @@ class AccountControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accountNumber").value("6543210987654321"));
 
+        //then
         Account updatedAccount = accountRepository.findById(account.getId()).orElseThrow();
         assertThat(updatedAccount.getAccountNumber()).isEqualTo("6543210987654321");
     }
@@ -156,6 +165,7 @@ class AccountControllerTest {
     @SneakyThrows
     @Test
     void deleteAccount() {
+        //given
         Customer customer = new Customer();
         customer.setFirstName("John");
         customer.setLastName("Doe");
@@ -173,15 +183,19 @@ class AccountControllerTest {
         account.setCustomer(customer);
         account = accountRepository.create(account);
 
+        //when
         mockMvc.perform(delete("/api/v1/accounts/" + account.getId()))
                 .andExpect(status().isOk());
 
+        //then
         assertThat(accountRepository.findById(account.getId())).isEmpty();
     }
 
     @SneakyThrows
     @Test
     void getAccountById_NotFound() {
+
+        //when, then
         mockMvc.perform(get("/api/v1/accounts/999"))
                 .andExpect(status().isNotFound());
     }

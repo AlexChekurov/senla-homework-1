@@ -82,6 +82,7 @@ class CardControllerTest {
     @SneakyThrows
     @Test
     void createCard() {
+        //given
         Customer customer = new Customer();
         customer.setFirstName("John");
         customer.setLastName("Doe");
@@ -108,6 +109,7 @@ class CardControllerTest {
         accountDTO.setIban(account.getIban());
         accountDTO.setCreatedAt(account.getCreatedAt());
 
+        //when
         MvcResult result = mockMvc.perform(post("/api/v1/cards")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"account\":{\"id\":" + accountDTO.getId() + ", \"accountNumber\":\"" + accountDTO.getAccountNumber() + "\", " +
@@ -122,6 +124,7 @@ class CardControllerTest {
                 .andExpect(jsonPath("$.cardNumber").value("1234567890123456"))
                 .andReturn();
 
+        //then
         var cardDto = objectMapper.readValue(result.getResponse().getContentAsString(), CardDTO.class);
         Card savedCard = cardRepository.findById(cardDto.getId()).orElseThrow();
         assertThat(savedCard.getCardNumber()).isEqualTo("1234567890123456");
@@ -132,6 +135,7 @@ class CardControllerTest {
     @SneakyThrows
     @Test
     void getAllCards() {
+        //given
         Customer customer = new Customer();
         customer.setFirstName("John");
         customer.setLastName("Doe");
@@ -158,6 +162,7 @@ class CardControllerTest {
         card.setAccount(account);
         cardRepository.create(card);
 
+        //when, then
         mockMvc.perform(get("/api/v1/cards"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].cardNumber").value("1234567890123456"));
@@ -166,6 +171,7 @@ class CardControllerTest {
     @SneakyThrows
     @Test
     void updateCard() {
+        //given
         Customer customer = new Customer();
         customer.setFirstName("John");
         customer.setLastName("Doe");
@@ -192,6 +198,7 @@ class CardControllerTest {
         card.setAccount(account);
         cardRepository.create(card);
 
+        //when
         mockMvc.perform(put("/api/v1/cards/" + card.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"accountId\":" + account.getId() + ", \"customerId\":" + customer.getId() + ", " +
@@ -200,6 +207,7 @@ class CardControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.cardNumber").value("6543210987654321"));
 
+        //then
         Card updatedCard = cardRepository.findById(card.getId()).orElseThrow();
         assertThat(updatedCard.getCardNumber()).isEqualTo("6543210987654321");
     }
@@ -207,6 +215,7 @@ class CardControllerTest {
     @SneakyThrows
     @Test
     void deleteCard() {
+        //given
         Customer customer = new Customer();
         customer.setFirstName("John");
         customer.setLastName("Doe");
@@ -233,15 +242,18 @@ class CardControllerTest {
         card.setAccount(account);
         cardRepository.create(card);
 
+        //when
         mockMvc.perform(delete("/api/v1/cards/" + card.getId()))
                 .andExpect(status().isOk());
 
+        //then
         assertThat(cardRepository.findById(card.getId())).isEmpty();
     }
 
     @SneakyThrows
     @Test
     void getCardById_NotFound() {
+        //when, then
         mockMvc.perform(get("/api/v1/cards/999"))
                 .andExpect(status().isNotFound());
     }

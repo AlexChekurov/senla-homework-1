@@ -8,4 +8,5 @@ import java.math.BigDecimal;
 public interface AccountService extends CrudService<Account, AccountDTO> {
     void transferMoney(Account fromAccount, Account toAccount, BigDecimal amount);
 
+
 }
