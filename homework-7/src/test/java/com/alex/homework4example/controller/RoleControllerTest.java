@@ -4,26 +4,21 @@ import com.alex.homework4example.config.AppConfig;
 import com.alex.homework4example.config.DataBaseConfig;
 import com.alex.homework4example.dto.RoleDTO;
 import com.alex.homework4example.handlers.GlobalExceptionHandler;
-import com.alex.homework4example.repository.RoleRepository;
-import com.alex.homework4example.service.RoleService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.*;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringJUnitConfig(classes = { AppConfig.class, DataBaseConfig.class, GlobalExceptionHandler.class })
 @WebAppConfiguration
@@ -31,133 +26,195 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class RoleControllerTest {
 
     private MockMvc mockMvc;
+    private String jwtToken;
 
     @Autowired
     private RoleController roleController;
 
     @Autowired
-    private RoleService roleService;
-
-    @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
     private GlobalExceptionHandler globalExceptionHandler;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @BeforeEach
-    public void setUp() {
+    void setUp() throws Exception {
         this.mockMvc = MockMvcBuilders.standaloneSetup(roleController)
                 .setControllerAdvice(globalExceptionHandler)
                 .build();
 
-        roleRepository.deleteAll();
+        // Получаем JWT-токен с ролью ADMIN
+        jwtToken = obtainJwtToken("adminUser", "adminPassword");
+    }
+
+    @SneakyThrows
+    private String obtainJwtToken(String username, String password) {
+        String content = "{ \"username\": \"" + username + "\", \"password\": \"" + password + "\" }";
+
+        MvcResult result = mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String token = result.getResponse().getHeader("Authorization");
+        assertThat(token).isNotNull();
+
+        return token.replace("Bearer ", "");
     }
 
     @SneakyThrows
     @Test
-    void createRole() {
-        //given
-        String roleJson = "{\"name\":\"Admin\"}";
+    void createRoleTest() {
+        // given
+        var role = "CREATE_ROLE_TEST";
+        var roleId = createRole(role);
 
-        //when
-        mockMvc.perform(post("/api/v1/roles")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(roleJson))
+        // then
+        mockMvc.perform(get("/api/v1/roles/" + roleId)
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Admin"));
-
-        //then
-        assertThat(roleRepository.findAll()).hasSize(1);
-        assertThat(roleRepository.findAll().get(0).getName()).isEqualTo("Admin");
+                .andExpect(jsonPath("$.name").value(role));
     }
 
     @SneakyThrows
     @Test
     void getAllRoles() {
-        //given
-        roleService.create(new RoleDTO(null, "Admin"));
+        // given
+        var expectedRoleName = "GET_ALL_ROLES";
+        createRole(expectedRoleName);
 
-        //when
-        mockMvc.perform(get("/api/v1/roles"))
+        // when
+        var responseString = mockMvc.perform(get("/api/v1/roles")
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].name").value("Admin"));
-        //then
-        assertThat(roleRepository.findAll()).hasSize(1);
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // then
+        var roles = objectMapper.readValue(responseString, RoleDTO[].class);
+        assertThat(roles).hasSizeGreaterThanOrEqualTo(1)
+                .extracting(RoleDTO::getName)
+                .contains(expectedRoleName);
     }
 
     @SneakyThrows
     @Test
     void getRoleById() {
-        //given
-        RoleDTO createdRole = roleService.create(new RoleDTO(null, "Admin"));
+        // given
+        var role = "GET_ROLE_BY_ID_TEST";
+        var roleId = createRole(role);
 
-        //when
-        mockMvc.perform(get("/api/v1/roles/" + createdRole.getId()))
+        // then
+        mockMvc.perform(get("/api/v1/roles/" + roleId)
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Admin"));
-        //then
-        assertThat(roleRepository.findById(createdRole.getId())).isPresent();
+                .andExpect(jsonPath("$.name").value(role));
     }
 
     @SneakyThrows
     @Test
     void getRoleById_NotFound() {
-        //when
-        mockMvc.perform(get("/api/v1/roles/999"))
+        // then
+        mockMvc.perform(get("/api/v1/roles/999")
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Can't find entity with id: 999"));
-
-        //then
-        assertThat(roleRepository.findAll()).isEmpty();
     }
 
     @SneakyThrows
     @Test
     void updateRole() {
-        //given
-        RoleDTO createdRole = roleService.create(new RoleDTO(null, "Admin"));
-        String roleJson = "{\"name\":\"User\"}";
+        // given
+        var oldRole = "UPDATE_ROLE_TEST";
+        var newRole = "UPDATE_ROLE_TEST_UPDATED";
+        var roleString = createRoleWithResponse(oldRole);
+        var roleID = JsonPath.read(roleString, "$.id");
+        var putRequest = roleString.replace(oldRole, newRole);
 
-        //when
-        mockMvc.perform(put("/api/v1/roles/" + createdRole.getId())
+        // when
+        mockMvc.perform(put("/api/v1/roles/" + roleID)
+                        .header("Authorization", "Bearer " + jwtToken)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(roleJson))
+                        .content(putRequest))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("User"));
-        //then
-        assertThat(roleRepository.findById(createdRole.getId())).isPresent();
-        assertThat(roleRepository.findById(createdRole.getId()).get().getName()).isEqualTo("User");
+                .andExpect(jsonPath("$.name").value(newRole));
+
+        // then
+        mockMvc.perform(get("/api/v1/roles/" + roleID)
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value(newRole));
     }
 
     @SneakyThrows
     @Test
     void updateRole_NotFound() {
-        //given
+        // given
         String roleJson = "{\"name\":\"User\"}";
 
-        //when
+        // when
         mockMvc.perform(put("/api/v1/roles/999")
+                        .header("Authorization", "Bearer " + jwtToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(roleJson))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Can't update role with id :999"));
-
-        //then
-        assertThat(roleRepository.findAll()).isEmpty();
     }
 
     @SneakyThrows
     @Test
     void deleteRole() {
-        //given
-        RoleDTO createdRole = roleService.create(new RoleDTO(null, "Admin"));
+        // given
+        var roleId = createRole("DELETE_ROLE_TEST");
 
-        //when
-        mockMvc.perform(delete("/api/v1/roles/" + createdRole.getId()))
-                .andExpect(status().isOk());
+        // when
+        mockMvc.perform(delete("/api/v1/roles/" + roleId)
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isNoContent());
 
-        //then
-        assertThat(roleRepository.findById(createdRole.getId())).isNotPresent();
+        // then
+        mockMvc.perform(get("/api/v1/roles/" + roleId)
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Can't find entity with id: " + roleId));
     }
 
+    @SneakyThrows
+    @Test
+    void accessWithoutToken_ShouldReturnUnauthorized() {
+        mockMvc.perform(get("/api/v1/roles"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @SneakyThrows
+    @Test
+    void accessWithInsufficientRole_ShouldReturnForbidden() {
+        // Получаем токен пользователя с ролью USER
+        String userToken = obtainJwtToken("testUser", "testPassword");
+
+        mockMvc.perform(get("/api/v1/roles")
+                        .header("Authorization", "Bearer " + userToken))
+                .andExpect(status().isForbidden());
+    }
+
+    @SneakyThrows
+    private Integer createRole(String roleName) {
+        return JsonPath.read(createRoleWithResponse(roleName), "$.id");
+    }
+
+    @SneakyThrows
+    private String createRoleWithResponse(String roleName) {
+        String roleJson = "{\"name\":\"" + roleName + "\"}";
+
+        return mockMvc.perform(post("/api/v1/roles")
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(roleJson))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+    }
 }

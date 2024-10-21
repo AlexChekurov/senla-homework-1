@@ -10,8 +10,10 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 
@@ -35,6 +37,26 @@ public abstract class AbstractRepository<T> {
         CriteriaQuery<T> query = cb.createQuery(entityType);
         query.from(entityType);
         return entityManager.createQuery(query).getResultList();
+    }
+
+    @Transactional
+    public List<T> findAll(int page, int size, Map<String, Object> params) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<T> query = cb.createQuery(entityType);
+        Root<T> root = query.from(entityType);
+        if (CollectionUtils.isEmpty(params)) {
+            query.select(root);
+        } else {
+            var predicates = params.entrySet().stream()
+                    .map(entry -> cb.equal(root.get(entry.getKey()), entry.getValue()))
+                    .toList();
+            query.select(root).where(predicates.toArray(new Predicate[0]));
+        }
+
+        return entityManager.createQuery(query)
+                .setFirstResult(page * size)
+                .setMaxResults(size)
+                .getResultList();
     }
 
     @Transactional
@@ -62,7 +84,14 @@ public abstract class AbstractRepository<T> {
     public int deleteAll() {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaDelete<T> criteriaDelete = cb.createCriteriaDelete(entityType);
-        return entityManager.createQuery(criteriaDelete).executeUpdate();
+        criteriaDelete.from(entityType);
+
+        int deletedCount = entityManager.createQuery(criteriaDelete).executeUpdate();
+        if (deletedCount > 0) {
+            entityManager.clear();
+        }
+
+        return deletedCount;
     }
 
     @Transactional

@@ -1,4 +1,44 @@
 -------------------------------------------------------------------------------
 Test set: com.alex.homework4example.controller.UserControllerTest
 -------------------------------------------------------------------------------
-Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.383 s - in com.alex.homework4example.controller.UserControllerTest
+Tests run: 8, Failures: 8, Errors: 0, Skipped: 0, Time elapsed: 0.549 s <<< FAILURE! - in com.alex.homework4example.controller.UserControllerTest
+getAllUsers  Time elapsed: 0.116 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.UserControllerTest.obtainJwtToken(UserControllerTest.java:64)
+	at com.alex.homework4example.controller.UserControllerTest.setUp(UserControllerTest.java:54)
+
+updateUser  Time elapsed: 0.014 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.UserControllerTest.obtainJwtToken(UserControllerTest.java:64)
+	at com.alex.homework4example.controller.UserControllerTest.setUp(UserControllerTest.java:54)
+
+getUserById_NotFound  Time elapsed: 0.009 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.UserControllerTest.obtainJwtToken(UserControllerTest.java:64)
+	at com.alex.homework4example.controller.UserControllerTest.setUp(UserControllerTest.java:54)
+
+accessWithoutToken_ShouldReturnUnauthorized  Time elapsed: 0.017 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.UserControllerTest.obtainJwtToken(UserControllerTest.java:64)
+	at com.alex.homework4example.controller.UserControllerTest.setUp(UserControllerTest.java:54)
+
+accessWithInsufficientRole_ShouldReturnForbidden  Time elapsed: 0.005 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.UserControllerTest.obtainJwtToken(UserControllerTest.java:64)
+	at com.alex.homework4example.controller.UserControllerTest.setUp(UserControllerTest.java:54)
+
+createUser  Time elapsed: 0.009 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.UserControllerTest.obtainJwtToken(UserControllerTest.java:64)
+	at com.alex.homework4example.controller.UserControllerTest.setUp(UserControllerTest.java:54)
+
+deleteUser  Time elapsed: 0.01 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.UserControllerTest.obtainJwtToken(UserControllerTest.java:64)
+	at com.alex.homework4example.controller.UserControllerTest.setUp(UserControllerTest.java:54)
+
+getUserById  Time elapsed: 0.009 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.UserControllerTest.obtainJwtToken(UserControllerTest.java:64)
+	at com.alex.homework4example.controller.UserControllerTest.setUp(UserControllerTest.java:54)
+

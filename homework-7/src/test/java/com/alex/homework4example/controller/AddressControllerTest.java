@@ -3,165 +3,181 @@ package com.alex.homework4example.controller;
 import com.alex.homework4example.config.AppConfig;
 import com.alex.homework4example.config.DataBaseConfig;
 import com.alex.homework4example.dto.AddressDTO;
-import com.alex.homework4example.entity.Address;
 import com.alex.homework4example.handlers.GlobalExceptionHandler;
-import com.alex.homework4example.repository.AddressRepository;
-import com.alex.homework4example.service.AddressService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.jdbc.*;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.*;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringJUnitConfig(classes = { AppConfig.class, DataBaseConfig.class, GlobalExceptionHandler.class })
+@SpringJUnitConfig(classes = {AppConfig.class, DataBaseConfig.class, GlobalExceptionHandler.class})
 @WebAppConfiguration
 @TestPropertySource(locations = "classpath:application-test.properties")
+@Sql(
+        scripts = {"classpath:sql/address_test_data.sql"},
+        config = @SqlConfig(encoding = "UTF-8")
+)
+@Transactional
 class AddressControllerTest {
 
     private MockMvc mockMvc;
+    private String jwtToken;
 
     @Autowired
     private AddressController addressController;
 
     @Autowired
-    private AddressService addressService;
-
-    @Autowired
-    private AddressRepository addressRepository;
-
-    @Autowired
     private GlobalExceptionHandler globalExceptionHandler;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @BeforeEach
-    public void setUp() {
+    void setUp() throws Exception {
         this.mockMvc = MockMvcBuilders.standaloneSetup(addressController)
                 .setControllerAdvice(globalExceptionHandler)
                 .build();
 
-        addressRepository.deleteAll();
+        // Obtain JWT token
+        jwtToken = obtainJwtToken("testUser", "testPassword");
+    }
+
+    @SneakyThrows
+    private String obtainJwtToken(String username, String password) {
+        String content = "{ \"username\": \"" + username + "\", \"password\": \"" + password + "\" }";
+
+        MvcResult result = mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String token = result.getResponse().getHeader("Authorization");
+        assertThat(token).isNotNull();
+
+        return token.replace("Bearer ", "");
     }
 
     @SneakyThrows
     @Test
     void createAddress() {
-        //given
+        // Given
         String addressJson = """
                 {
                     "street": "Main St",
-                    "city": "New York",
-                    "postalCode": "10001"
+                    "city": "Moxon",
+                    "postalCode": "123r113"
                 }
                 """;
 
-        //when
-        mockMvc.perform(post("/api/v1/addresses")
+        // When
+        var response = mockMvc.perform(post("/api/v1/addresses")
+                        .header("Authorization", "Bearer " + jwtToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(addressJson))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.street").value("Main St"))
-                .andExpect(jsonPath("$.city").value("New York"))
-                .andExpect(jsonPath("$.postalCode").value("10001"));
+                .andExpect(jsonPath("$.city").value("Moxon"))
+                .andExpect(jsonPath("$.postalCode").value("123r113"))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
 
-        //then
-        assertThat(addressRepository.findAll()).hasSize(1);
-        Address address = addressRepository.findAll().get(0);
-        assertThat(address.getStreet()).isEqualTo("Main St");
-        assertThat(address.getCity()).isEqualTo("New York");
-        assertThat(address.getPostalCode()).isEqualTo("10001");
+        var createdAddress = objectMapper.readValue(response, AddressDTO.class);
+
+        // Then
+        mockMvc.perform(get("/api/v1/addresses/" + createdAddress.getId())
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.street").value("Main St"))
+                .andExpect(jsonPath("$.city").value("Moxon"))
+                .andExpect(jsonPath("$.postalCode").value("123r113"));
     }
 
     @SneakyThrows
     @Test
     void getAllAddresses() {
-        //given
-        addressService.create(new AddressDTO(null, "Main St", "New York", "10001"));
-
-        //when
-        mockMvc.perform(get("/api/v1/addresses"))
+        // When
+        var responseString = mockMvc.perform(get("/api/v1/addresses")
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].street").value("Main St"))
-                .andExpect(jsonPath("$[0].city").value("New York"))
-                .andExpect(jsonPath("$[0].postalCode").value("10001"));
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
 
-        //then
-        assertThat(addressRepository.findAll()).hasSize(1);
+        var addresses = objectMapper.readValue(responseString, AddressDTO[].class);
+
+        // Then
+        assertThat(addresses).hasSizeGreaterThanOrEqualTo(2);
     }
 
     @SneakyThrows
     @Test
     void getAddressById() {
-        //given
-        AddressDTO createdAddress = addressService.create(new AddressDTO(null, "Main St", "New York", "10001"));
-
-        //when
-        mockMvc.perform(get("/api/v1/addresses/" + createdAddress.getId()))
+        // When
+        mockMvc.perform(get("/api/v1/addresses/555555")
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.street").value("Main St"))
-                .andExpect(jsonPath("$.city").value("New York"))
-                .andExpect(jsonPath("$.postalCode").value("10001"));
-
-        //then
-        assertThat(addressRepository.findById(createdAddress.getId())).isPresent();
+                .andExpect(jsonPath("$.street").value("123 Main St"))
+                .andExpect(jsonPath("$.city").value("New Alabama"))
+                .andExpect(jsonPath("$.postalCode").value("10003"));
     }
 
     @SneakyThrows
     @Test
     void getAddressById_NotFound() {
-        //when
-        mockMvc.perform(get("/api/v1/addresses/999"))
+        // When
+        mockMvc.perform(get("/api/v1/addresses/999")
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Can't find entity with id: 999"));
-
-        //then
-        assertThat(addressRepository.findAll()).isEmpty();
     }
 
     @SneakyThrows
     @Test
     void updateAddress() {
-        //given
-        AddressDTO createdAddress = addressService.create(new AddressDTO(null, "Main St", "New York", "10001"));
-        String updatedAddressJson = """
-                {
-                    "street": "Elm St",
-                    "city": "Los Angeles",
-                    "postalCode": "90001"
-                }
-                """;
-
-        //when
-        mockMvc.perform(put("/api/v1/addresses/" + createdAddress.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(updatedAddressJson))
+        // Given
+        var existingAddress = mockMvc.perform(get("/api/v1/addresses/22222")
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.street").value("Elm St"))
-                .andExpect(jsonPath("$.city").value("Los Angeles"))
-                .andExpect(jsonPath("$.postalCode").value("90001"));
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
 
-        //then
-        Address updatedAddress = addressRepository.findById(createdAddress.getId()).get();
-        assertThat(updatedAddress.getStreet()).isEqualTo("Elm St");
-        assertThat(updatedAddress.getCity()).isEqualTo("Los Angeles");
-        assertThat(updatedAddress.getPostalCode()).isEqualTo("90001");
+        var updatedPostalCode = "-1";
+        var putRequest = existingAddress.replace("123412311122233", updatedPostalCode);
+
+        // When
+        mockMvc.perform(put("/api/v1/addresses/22222")
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(putRequest))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.postalCode").value(updatedPostalCode));
+
+        // Then
+        mockMvc.perform(get("/api/v1/addresses/22222")
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.postalCode").value(updatedPostalCode));
     }
 
     @SneakyThrows
     @Test
     void updateAddress_NotFound() {
-        //given
+        // Given
         String updatedAddressJson = """
                 {
                     "street": "Elm St",
@@ -170,28 +186,33 @@ class AddressControllerTest {
                 }
                 """;
 
-        //when
+        // When
         mockMvc.perform(put("/api/v1/addresses/999")
+                        .header("Authorization", "Bearer " + jwtToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updatedAddressJson))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Can't update address with addressId: 999"));
-
-        //then
-        assertThat(addressRepository.findAll()).isEmpty();
     }
 
     @SneakyThrows
     @Test
     void deleteAddress() {
-        //given
-        AddressDTO createdAddress = addressService.create(new AddressDTO(null, "Main St", "New York", "10001"));
+        // When
+        mockMvc.perform(delete("/api/v1/addresses/888888")
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isNoContent());
 
-        //when
-        mockMvc.perform(delete("/api/v1/addresses/" + createdAddress.getId()))
-                .andExpect(status().isOk());
+        // Then
+        mockMvc.perform(get("/api/v1/addresses/888888")
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isNotFound());
+    }
 
-        //then
-        assertThat(addressRepository.findById(createdAddress.getId())).isNotPresent();
+    @SneakyThrows
+    @Test
+    void accessWithoutToken_ShouldReturnUnauthorized() {
+        mockMvc.perform(get("/api/v1/addresses"))
+                .andExpect(status().isUnauthorized());
     }
 }

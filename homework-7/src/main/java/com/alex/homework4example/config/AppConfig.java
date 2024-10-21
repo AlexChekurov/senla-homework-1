@@ -1,10 +1,8 @@
 package com.alex.homework4example.config;
 
-import com.alex.homework4example.Application;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.jeasy.random.EasyRandom;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -15,10 +13,12 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @Configuration
 @PropertySource("classpath:application.properties")
-@ComponentScan(basePackageClasses = Application.class)
+@ComponentScan(basePackages = AppConfig.BASE_PACKAGE)
 @EnableTransactionManagement
 @EnableWebMvc
 public class AppConfig {
+
+    public static final String BASE_PACKAGE = "com.alex.homework4example";
 
     @Bean
     public ObjectMapper objectMapper() {

@@ -1,4 +1,44 @@
 -------------------------------------------------------------------------------
 Test set: com.alex.homework4example.controller.TransactionControllerTest
 -------------------------------------------------------------------------------
-Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.068 s - in com.alex.homework4example.controller.TransactionControllerTest
+Tests run: 8, Failures: 8, Errors: 0, Skipped: 0, Time elapsed: 0.097 s <<< FAILURE! - in com.alex.homework4example.controller.TransactionControllerTest
+deleteTransaction  Time elapsed: 0.004 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.TransactionControllerTest.obtainJwtToken(TransactionControllerTest.java:69)
+	at com.alex.homework4example.controller.TransactionControllerTest.setUp(TransactionControllerTest.java:59)
+
+createTransaction  Time elapsed: 0.013 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.TransactionControllerTest.obtainJwtToken(TransactionControllerTest.java:69)
+	at com.alex.homework4example.controller.TransactionControllerTest.setUp(TransactionControllerTest.java:59)
+
+updateTransaction_NotFound  Time elapsed: 0.011 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.TransactionControllerTest.obtainJwtToken(TransactionControllerTest.java:69)
+	at com.alex.homework4example.controller.TransactionControllerTest.setUp(TransactionControllerTest.java:59)
+
+accessWithoutToken_ShouldReturnUnauthorized  Time elapsed: 0.01 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.TransactionControllerTest.obtainJwtToken(TransactionControllerTest.java:69)
+	at com.alex.homework4example.controller.TransactionControllerTest.setUp(TransactionControllerTest.java:59)
+
+getTransactionById  Time elapsed: 0.012 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.TransactionControllerTest.obtainJwtToken(TransactionControllerTest.java:69)
+	at com.alex.homework4example.controller.TransactionControllerTest.setUp(TransactionControllerTest.java:59)
+
+updateTransaction  Time elapsed: 0.016 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.TransactionControllerTest.obtainJwtToken(TransactionControllerTest.java:69)
+	at com.alex.homework4example.controller.TransactionControllerTest.setUp(TransactionControllerTest.java:59)
+
+getTransactionById_NotFound  Time elapsed: 0.017 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.TransactionControllerTest.obtainJwtToken(TransactionControllerTest.java:69)
+	at com.alex.homework4example.controller.TransactionControllerTest.setUp(TransactionControllerTest.java:59)
+
+getAllTransactions  Time elapsed: 0.011 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.TransactionControllerTest.obtainJwtToken(TransactionControllerTest.java:69)
+	at com.alex.homework4example.controller.TransactionControllerTest.setUp(TransactionControllerTest.java:59)
+

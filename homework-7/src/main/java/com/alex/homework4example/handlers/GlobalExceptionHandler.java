@@ -4,6 +4,7 @@ import com.alex.homework4example.dto.ErrorDto;
 import com.alex.homework4example.exception.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -18,7 +19,7 @@ public class GlobalExceptionHandler {
         return new ErrorDto(false, ex.getMessage());
     }
 
-    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorDto handleBadRequestExceptions(Exception ex) {
         return new ErrorDto(false, ex.getMessage());
@@ -29,5 +30,6 @@ public class GlobalExceptionHandler {
     public ErrorDto handleAllExceptions(Exception ex) {
         return new ErrorDto(false, ex.getMessage());
     }
+
 
 }

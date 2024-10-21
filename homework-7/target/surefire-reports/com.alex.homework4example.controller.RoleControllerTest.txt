@@ -1,4 +1,49 @@
 -------------------------------------------------------------------------------
 Test set: com.alex.homework4example.controller.RoleControllerTest
 -------------------------------------------------------------------------------
-Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.049 s - in com.alex.homework4example.controller.RoleControllerTest
+Tests run: 9, Failures: 9, Errors: 0, Skipped: 0, Time elapsed: 0.07 s <<< FAILURE! - in com.alex.homework4example.controller.RoleControllerTest
+getAllRoles  Time elapsed: 0.002 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.RoleControllerTest.obtainJwtToken(RoleControllerTest.java:57)
+	at com.alex.homework4example.controller.RoleControllerTest.setUp(RoleControllerTest.java:47)
+
+updateRole  Time elapsed: 0.01 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.RoleControllerTest.obtainJwtToken(RoleControllerTest.java:57)
+	at com.alex.homework4example.controller.RoleControllerTest.setUp(RoleControllerTest.java:47)
+
+accessWithoutToken_ShouldReturnUnauthorized  Time elapsed: 0.007 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.RoleControllerTest.obtainJwtToken(RoleControllerTest.java:57)
+	at com.alex.homework4example.controller.RoleControllerTest.setUp(RoleControllerTest.java:47)
+
+updateRole_NotFound  Time elapsed: 0.009 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.RoleControllerTest.obtainJwtToken(RoleControllerTest.java:57)
+	at com.alex.homework4example.controller.RoleControllerTest.setUp(RoleControllerTest.java:47)
+
+accessWithInsufficientRole_ShouldReturnForbidden  Time elapsed: 0.008 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.RoleControllerTest.obtainJwtToken(RoleControllerTest.java:57)
+	at com.alex.homework4example.controller.RoleControllerTest.setUp(RoleControllerTest.java:47)
+
+createRoleTest  Time elapsed: 0.009 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.RoleControllerTest.obtainJwtToken(RoleControllerTest.java:57)
+	at com.alex.homework4example.controller.RoleControllerTest.setUp(RoleControllerTest.java:47)
+
+deleteRole  Time elapsed: 0.007 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.RoleControllerTest.obtainJwtToken(RoleControllerTest.java:57)
+	at com.alex.homework4example.controller.RoleControllerTest.setUp(RoleControllerTest.java:47)
+
+getRoleById  Time elapsed: 0.008 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.RoleControllerTest.obtainJwtToken(RoleControllerTest.java:57)
+	at com.alex.homework4example.controller.RoleControllerTest.setUp(RoleControllerTest.java:47)
+
+getRoleById_NotFound  Time elapsed: 0.007 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.RoleControllerTest.obtainJwtToken(RoleControllerTest.java:57)
+	at com.alex.homework4example.controller.RoleControllerTest.setUp(RoleControllerTest.java:47)
+

@@ -1,4 +1,34 @@
 -------------------------------------------------------------------------------
 Test set: com.alex.homework4example.controller.CustomerControllerTest
 -------------------------------------------------------------------------------
-Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.04 s - in com.alex.homework4example.controller.CustomerControllerTest
+Tests run: 6, Failures: 6, Errors: 0, Skipped: 0, Time elapsed: 0.054 s <<< FAILURE! - in com.alex.homework4example.controller.CustomerControllerTest
+deleteCustomer  Time elapsed: 0.003 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.CustomerControllerTest.obtainJwtToken(CustomerControllerTest.java:64)
+	at com.alex.homework4example.controller.CustomerControllerTest.setUp(CustomerControllerTest.java:54)
+
+getCustomerById_NotFound  Time elapsed: 0.01 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.CustomerControllerTest.obtainJwtToken(CustomerControllerTest.java:64)
+	at com.alex.homework4example.controller.CustomerControllerTest.setUp(CustomerControllerTest.java:54)
+
+getAllCustomers  Time elapsed: 0.009 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.CustomerControllerTest.obtainJwtToken(CustomerControllerTest.java:64)
+	at com.alex.homework4example.controller.CustomerControllerTest.setUp(CustomerControllerTest.java:54)
+
+accessWithoutToken_ShouldReturnUnauthorized  Time elapsed: 0.011 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.CustomerControllerTest.obtainJwtToken(CustomerControllerTest.java:64)
+	at com.alex.homework4example.controller.CustomerControllerTest.setUp(CustomerControllerTest.java:54)
+
+updateCustomer  Time elapsed: 0.009 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.CustomerControllerTest.obtainJwtToken(CustomerControllerTest.java:64)
+	at com.alex.homework4example.controller.CustomerControllerTest.setUp(CustomerControllerTest.java:54)
+
+createCustomer  Time elapsed: 0.009 s  <<< FAILURE!
+java.lang.AssertionError: Status expected:<200> but was:<500>
+	at com.alex.homework4example.controller.CustomerControllerTest.obtainJwtToken(CustomerControllerTest.java:64)
+	at com.alex.homework4example.controller.CustomerControllerTest.setUp(CustomerControllerTest.java:54)
+

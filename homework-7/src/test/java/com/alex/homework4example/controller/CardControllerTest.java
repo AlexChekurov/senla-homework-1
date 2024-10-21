@@ -2,65 +2,41 @@ package com.alex.homework4example.controller;
 
 import com.alex.homework4example.config.AppConfig;
 import com.alex.homework4example.config.DataBaseConfig;
-import com.alex.homework4example.dto.AccountDTO;
 import com.alex.homework4example.dto.CardDTO;
-import com.alex.homework4example.entity.Account;
-import com.alex.homework4example.entity.Card;
-import com.alex.homework4example.entity.Customer;
 import com.alex.homework4example.handlers.GlobalExceptionHandler;
-import com.alex.homework4example.repository.AccountRepository;
-import com.alex.homework4example.repository.CardRepository;
-import com.alex.homework4example.repository.CustomerRepository;
-import com.alex.homework4example.service.CardService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.jdbc.*;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.*;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringJUnitConfig(classes = { AppConfig.class, DataBaseConfig.class, GlobalExceptionHandler.class })
 @TestPropertySource(locations = "classpath:application-test.properties")
 @WebAppConfiguration
 @Transactional
+@Sql(
+        scripts = { "classpath:sql/card_test_data.sql" },
+        config = @SqlConfig(encoding = "UTF-8")
+)
 class CardControllerTest {
 
     private MockMvc mockMvc;
+    private String jwtToken;
 
     @Autowired
     private CardController cardController;
-
-    @Autowired
-    private CardService cardService;
-
-    @Autowired
-    private CardRepository cardRepository;
-
-    @Autowired
-    private AccountRepository accountRepository;
-
-    @Autowired
-    private CustomerRepository customerRepository;
 
     @Autowired
     private GlobalExceptionHandler globalExceptionHandler;
@@ -69,193 +45,139 @@ class CardControllerTest {
     private ObjectMapper objectMapper;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() throws Exception {
         this.mockMvc = MockMvcBuilders.standaloneSetup(cardController)
                 .setControllerAdvice(globalExceptionHandler)
                 .build();
 
-        cardRepository.deleteAll();
-        accountRepository.deleteAll();
-        customerRepository.deleteAll();
+        // Получаем JWT-токен
+        jwtToken = obtainJwtToken("testUser", "testPassword");
+    }
+
+    @SneakyThrows
+    private String obtainJwtToken(String username, String password) {
+        String content = "{ \"username\": \"" + username + "\", \"password\": \"" + password + "\" }";
+
+        MvcResult result = mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String token = result.getResponse().getHeader("Authorization");
+        assertThat(token).isNotNull();
+
+        return token.replace("Bearer ", "");
     }
 
     @SneakyThrows
     @Test
     void createCard() {
-        //given
-        Customer customer = new Customer();
-        customer.setFirstName("John");
-        customer.setLastName("Doe");
-        customer.setEmail("john.doe@example.com");
-        customer.setPhone("1234567890");
-        customerRepository.create(customer);
-
-        Account account = new Account();
-        account.setAccountNumber("1234567890123456");
-        account.setAccountType("SAVINGS");
-        account.setBalance(new BigDecimal("1000.00"));
-        account.setCurrency("USD");
-        account.setIban("US1234567890123456");
-        account.setCreatedAt(LocalDateTime.now());
-        account.setCustomer(customer);
-        accountRepository.create(account);
-
-        AccountDTO accountDTO = new AccountDTO();
-        accountDTO.setId(account.getId());
-        accountDTO.setAccountNumber(account.getAccountNumber());
-        accountDTO.setAccountType(account.getAccountType());
-        accountDTO.setBalance(account.getBalance());
-        accountDTO.setCurrency(account.getCurrency());
-        accountDTO.setIban(account.getIban());
-        accountDTO.setCreatedAt(account.getCreatedAt());
-
-        //when
-        MvcResult result = mockMvc.perform(post("/api/v1/cards")
+        // given
+        var newCardDto = """
+                {
+                  "cardNumber": "3333-5678-9101-1121",
+                  "cardType": "BELTA_TRANS",
+                  "expirationDate": "2026-12-29",
+                  "cvv": "433",
+                  "accountId": 115555
+                }
+                """;
+        // when
+        var cardResponse = mockMvc.perform(post("/api/v1/cards")
+                        .header("Authorization", "Bearer " + jwtToken)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"account\":{\"id\":" + accountDTO.getId() + ", \"accountNumber\":\"" + accountDTO.getAccountNumber() + "\", " +
-                                "\"accountType\":\"" + accountDTO.getAccountType() + "\", \"balance\":" + accountDTO.getBalance() + ", " +
-                                "\"currency\":\"" + accountDTO.getCurrency() + "\", \"iban\":\"" + accountDTO.getIban() + "\", " +
-                                "\"createdAt\":\"" + accountDTO.getCreatedAt() + "\"}, " +
-                                "\"customerId\":" + customer.getId() + ", " +
-                                "\"cardNumber\":\"1234567890123456\", \"cardType\":\"DEBIT\", " +
-                                "\"expirationDate\":\"2025-12-31\", \"cvv\":\"123\", " +
-                                "\"createdAt\":\"" + LocalDateTime.now() + "\"}"))
+                        .content(newCardDto))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.cardNumber").value("1234567890123456"))
-                .andReturn();
+                .andExpect(jsonPath("$.cardNumber").value("3333-5678-9101-1121"))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
 
-        //then
-        var cardDto = objectMapper.readValue(result.getResponse().getContentAsString(), CardDTO.class);
-        Card savedCard = cardRepository.findById(cardDto.getId()).orElseThrow();
-        assertThat(savedCard.getCardNumber()).isEqualTo("1234567890123456");
-        assertThat(savedCard.getAccount().getId()).isEqualTo(account.getId());
-        assertThat(cardDto.getAccount().getId()).isEqualTo(account.getId());
+        // then
+        var cardId = JsonPath.read(cardResponse, "$.id");
+        mockMvc.perform(get("/api/v1/cards/" + cardId)
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.cardType").value("BELTA_TRANS"))
+                .andExpect(jsonPath("$.cardNumber").value("3333-5678-9101-1121"));
     }
 
     @SneakyThrows
     @Test
     void getAllCards() {
-        //given
-        Customer customer = new Customer();
-        customer.setFirstName("John");
-        customer.setLastName("Doe");
-        customer.setEmail("john.doe@example.com");
-        customer.setPhone("1234567890");
-        customerRepository.create(customer);
-
-        Account account = new Account();
-        account.setAccountNumber("1234567890123456");
-        account.setAccountType("SAVINGS");
-        account.setBalance(new BigDecimal("1000.00"));
-        account.setCurrency("USD");
-        account.setIban("US1234567890123456");
-        account.setCreatedAt(LocalDateTime.now());
-        account.setCustomer(customer);
-        accountRepository.create(account);
-
-        Card card = new Card();
-        card.setCardNumber("1234567890123456");
-        card.setCardType("DEBIT");
-        card.setExpirationDate(LocalDate.of(2025, 12, 31));
-        card.setCvv("123");
-        card.setCreatedAt(LocalDate.now());
-        card.setAccount(account);
-        cardRepository.create(card);
-
-        //when, then
-        mockMvc.perform(get("/api/v1/cards"))
+        // when
+        var cardsString = mockMvc.perform(get("/api/v1/cards")
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].cardNumber").value("1234567890123456"));
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // then
+        var cards = objectMapper.readValue(cardsString, CardDTO[].class);
+        assertThat(cards).hasSizeGreaterThanOrEqualTo(2)
+                .extracting(CardDTO::getCardNumber)
+                .contains("4445-5678-9101-1121");
     }
 
     @SneakyThrows
     @Test
     void updateCard() {
-        //given
-        Customer customer = new Customer();
-        customer.setFirstName("John");
-        customer.setLastName("Doe");
-        customer.setEmail("john.doe@example.com");
-        customer.setPhone("1234567890");
-        customerRepository.create(customer);
+        // given
+        var cardDTOString = """
+                {
+                  "id": 117777,
+                  "cardNumber": "4445-5678-9101-1121",
+                  "cardType": "PAY_PALL",
+                  "expirationDate": "2026-12-31",
+                  "cvv": "123",
+                  "accountId": 115555
+                }
+                """;
 
-        Account account = new Account();
-        account.setAccountNumber("1234567890123456");
-        account.setAccountType("SAVINGS");
-        account.setBalance(new BigDecimal("1000.00"));
-        account.setCurrency("USD");
-        account.setIban("US1234567890123456");
-        account.setCreatedAt(LocalDateTime.now());
-        account.setCustomer(customer);
-        accountRepository.create(account);
-
-        Card card = new Card();
-        card.setCardNumber("1234567890123456");
-        card.setCardType("DEBIT");
-        card.setExpirationDate(LocalDate.of(2025, 12, 31));
-        card.setCvv("123");
-        card.setCreatedAt(LocalDate.now());
-        card.setAccount(account);
-        cardRepository.create(card);
-
-        //when
-        mockMvc.perform(put("/api/v1/cards/" + card.getId())
+        // when
+        mockMvc.perform(put("/api/v1/cards/117777")
+                        .header("Authorization", "Bearer " + jwtToken)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"accountId\":" + account.getId() + ", \"customerId\":" + customer.getId() + ", " +
-                                "\"cardNumber\":\"6543210987654321\", \"cardType\":\"CREDIT\", " +
-                                "\"expirationDate\":\"2026-12-31\", \"cvv\":\"321\"}"))
+                        .content(cardDTOString))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.cardNumber").value("6543210987654321"));
+                .andExpect(jsonPath("$.cardNumber").value("4445-5678-9101-1121"));
 
-        //then
-        Card updatedCard = cardRepository.findById(card.getId()).orElseThrow();
-        assertThat(updatedCard.getCardNumber()).isEqualTo("6543210987654321");
+        // then
+        mockMvc.perform(get("/api/v1/cards/117777")
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.cardType").value("PAY_PALL"));
     }
 
     @SneakyThrows
     @Test
     void deleteCard() {
-        //given
-        Customer customer = new Customer();
-        customer.setFirstName("John");
-        customer.setLastName("Doe");
-        customer.setEmail("john.doe@example.com");
-        customer.setPhone("1234567890");
-        customerRepository.create(customer);
+        // when
+        mockMvc.perform(delete("/api/v1/cards/118888")
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isNoContent());
 
-        Account account = new Account();
-        account.setAccountNumber("1234567890123456");
-        account.setAccountType("SAVINGS");
-        account.setBalance(new BigDecimal("1000.00"));
-        account.setCurrency("USD");
-        account.setIban("US1234567890123456");
-        account.setCreatedAt(LocalDateTime.now());
-        account.setCustomer(customer);
-        accountRepository.create(account);
-
-        Card card = new Card();
-        card.setCardNumber("1234567890123456");
-        card.setCardType("DEBIT");
-        card.setExpirationDate(LocalDate.of(2025, 12, 31));
-        card.setCvv("123");
-        card.setCreatedAt(LocalDate.now());
-        card.setAccount(account);
-        cardRepository.create(card);
-
-        //when
-        mockMvc.perform(delete("/api/v1/cards/" + card.getId()))
-                .andExpect(status().isOk());
-
-        //then
-        assertThat(cardRepository.findById(card.getId())).isEmpty();
+        // then
+        mockMvc.perform(get("/api/v1/cards/118888")
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isNotFound());
     }
 
     @SneakyThrows
     @Test
     void getCardById_NotFound() {
-        //when, then
-        mockMvc.perform(get("/api/v1/cards/999"))
+        // when, then
+        mockMvc.perform(get("/api/v1/cards/999")
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isNotFound());
     }
 
+    @SneakyThrows
+    @Test
+    void accessWithoutToken_ShouldReturnUnauthorized() {
+        mockMvc.perform(get("/api/v1/cards"))
+                .andExpect(status().isUnauthorized());
+    }
 }

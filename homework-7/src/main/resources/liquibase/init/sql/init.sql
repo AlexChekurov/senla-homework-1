@@ -1,5 +1,6 @@
 -- Create the Roles table - ManyToOne relationship (many users can have one role)
-CREATE TABLE roles (
+
+CREATE TABLE IF NOT EXISTS roles (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL UNIQUE
 );
@@ -75,3 +76,12 @@ CREATE TABLE transaction_accounts (
     CONSTRAINT fk_account_transaction FOREIGN KEY(account_id) REFERENCES accounts(id) ON DELETE CASCADE,
     PRIMARY KEY (transaction_id, account_id)
 );
+
+ALTER TABLE transactions ADD COLUMN from_account_id BIGINT NOT NULL;
+ALTER TABLE transactions ADD COLUMN to_account_id BIGINT NOT NULL;
+
+ALTER TABLE transactions
+    ADD CONSTRAINT fk_from_account FOREIGN KEY (from_account_id) REFERENCES accounts(id) ON DELETE CASCADE;
+
+ALTER TABLE transactions
+    ADD CONSTRAINT fk_to_account FOREIGN KEY (to_account_id) REFERENCES accounts(id) ON DELETE CASCADE;

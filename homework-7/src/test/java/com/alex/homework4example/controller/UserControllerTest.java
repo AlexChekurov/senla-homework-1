@@ -2,56 +2,41 @@ package com.alex.homework4example.controller;
 
 import com.alex.homework4example.config.AppConfig;
 import com.alex.homework4example.config.DataBaseConfig;
-import com.alex.homework4example.dto.RoleDTO;
 import com.alex.homework4example.dto.UserDTO;
-import com.alex.homework4example.entity.Role;
-import com.alex.homework4example.entity.User;
 import com.alex.homework4example.handlers.GlobalExceptionHandler;
-import com.alex.homework4example.repository.RoleRepository;
-import com.alex.homework4example.repository.UserRepository;
-import com.alex.homework4example.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.jdbc.*;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.*;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringJUnitConfig(classes = { AppConfig.class, DataBaseConfig.class, GlobalExceptionHandler.class })
 @TestPropertySource(locations = "classpath:application-test.properties")
 @WebAppConfiguration
 @Transactional
+@Sql(
+        scripts = { "classpath:sql/user_test_data.sql" },
+        config = @SqlConfig(encoding = "UTF-8")
+)
 class UserControllerTest {
 
     private MockMvc mockMvc;
+    private String jwtToken;
 
     @Autowired
     private UserController userController;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private RoleRepository roleRepository;
 
     @Autowired
     private GlobalExceptionHandler globalExceptionHandler;
@@ -60,141 +45,150 @@ class UserControllerTest {
     private ObjectMapper objectMapper;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() throws Exception {
         this.mockMvc = MockMvcBuilders.standaloneSetup(userController)
                 .setControllerAdvice(globalExceptionHandler)
                 .build();
 
-        userRepository.deleteAll();
-        roleRepository.deleteAll();
+        // Получаем JWT-токен с ролью ADMIN
+        jwtToken = obtainJwtToken("adminUser", "adminPassword");
+    }
+
+    @SneakyThrows
+    private String obtainJwtToken(String username, String password) {
+        String content = "{ \"username\": \"" + username + "\", \"password\": \"" + password + "\" }";
+
+        MvcResult result = mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String token = result.getResponse().getHeader("Authorization");
+        assertThat(token).isNotNull();
+
+        return token.replace("Bearer ", "");
     }
 
     @SneakyThrows
     @Test
     void getAllUsers() {
-        //given
-        Role role = new Role();
-        role.setName("Admin");
-        roleRepository.create(role);
-
-        User user1 = new User();
-        user1.setUsername("alex");
-        user1.setPassword("password");
-        user1.setRole(role);
-        userRepository.create(user1);
-
-        User user2 = new User();
-        user2.setUsername("john");
-        user2.setPassword("password");
-        user2.setRole(role);
-        userRepository.create(user2);
-
-        //when, then
-        mockMvc.perform(get("/api/v1/users"))
+        // when
+        var usersListString = mockMvc.perform(get("/api/v1/users")
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].username").value("alex"))
-                .andExpect(jsonPath("$[1].username").value("john"));
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // then
+        var usersList = objectMapper.readValue(usersListString, UserDTO[].class);
+        assertThat(usersList).hasSizeGreaterThanOrEqualTo(2)
+                .extracting(UserDTO::getId)
+                .contains(1425487L);
     }
 
     @SneakyThrows
     @Test
     void getUserById() {
-        //given
-        Role role = new Role();
-        role.setName("Admin");
-        roleRepository.create(role);
-
-        User user = new User();
-        user.setUsername("alex");
-        user.setPassword("password");
-        user.setRole(role);
-        userRepository.create(user);
-
-        //when, then
-        mockMvc.perform(get("/api/v1/users/" + user.getId()))
+        // when, then
+        mockMvc.perform(get("/api/v1/users/1425487")
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("alex"));
+                .andExpect(jsonPath("$.username").value("alex_doe"));
     }
 
     @SneakyThrows
     @Test
     void createUser() {
-        //given
-        Role role = new Role();
-        role.setName("Admin");
-        roleRepository.create(role);
-
-        //when
-        MvcResult result = mockMvc.perform(post("/api/v1/users")
+        // when
+        var resultString = mockMvc.perform(post("/api/v1/users")
+                        .header("Authorization", "Bearer " + jwtToken)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"username\":\"alex\", \"password\":\"password\", \"role\":{\"id\":" + role.getId() + ", \"name\":\"Admin\"}}"))
+                        .content(
+                                "{\"username\":\"alex_wwww\", \"password\":\"password\", \"role\":{\"id\": 43678, "
+                                + "\"name\":\"Admin\"}}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("alex"))
-                .andReturn();
+                .andExpect(jsonPath("$.username").value("alex_wwww"))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        var userId = JsonPath.parse(resultString).read("$.id");
 
-        //then
-        var userDto = objectMapper.readValue(result.getResponse().getContentAsString(), UserDTO.class);
-        User savedUser = userRepository.findById(userDto.getId()).orElseThrow();
-        assertThat(savedUser.getRole().getId()).isEqualTo(role.getId());
+        // then
+        mockMvc.perform(get("/api/v1/users/" + userId)
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.username").value("alex_wwww"));
     }
 
     @SneakyThrows
     @Test
     void updateUser() {
-        //given
-        Role role = new Role();
-        role.setName("Admin");
-        roleRepository.create(role);
-
-        User user = new User();
-        user.setUsername("alex");
-        user.setPassword("password");
-        user.setRole(role);
-        userRepository.create(user);
-
-        Role newRole = new Role();
-        newRole.setName("User");
-        roleRepository.create(newRole);
-        //when
-        mockMvc.perform(put("/api/v1/users/" + user.getId())
+        // given
+        var putRequest = """
+                {
+                  "id" : 1425487,
+                  "username" : "neuton",
+                  "password" : "qqqq",
+                  "roleId" : 76543
+                }
+                """;
+        // when
+        mockMvc.perform(put("/api/v1/users/1425487")
+                        .header("Authorization", "Bearer " + jwtToken)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"username\":\"alex_updated\", \"password\":\"new_password\", \"role\":{\"id\":" + newRole.getId() + ", \"name\":\"User\"}}"))
+                        .content(putRequest))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("alex_updated"));
+                .andExpect(jsonPath("$.username").value("neuton"));
 
-        //then
-        User updatedUser = userRepository.findById(user.getId()).orElseThrow();
-        assertThat(updatedUser.getUsername()).isEqualTo("alex_updated");
+        // then
+        mockMvc.perform(get("/api/v1/users/1425487")
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.username").value("neuton"));
     }
 
     @SneakyThrows
     @Test
     void deleteUser() {
-        //given
-        Role role = new Role();
-        role.setName("Admin");
-        roleRepository.create(role);
+        // when
+        mockMvc.perform(delete("/api/v1/users/7893")
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isNoContent());
 
-        User user = new User();
-        user.setUsername("alex");
-        user.setPassword("password");
-        user.setRole(role);
-        userRepository.create(user);
-
-        //when
-        mockMvc.perform(delete("/api/v1/users/" + user.getId()))
-                .andExpect(status().isOk());
-
-        //then
-        assertThat(userRepository.findById(user.getId())).isEmpty();
+        // then
+        mockMvc.perform(get("/api/v1/users/7893")
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isNotFound());
     }
 
     @SneakyThrows
     @Test
     void getUserById_NotFound() {
-        //when, then
-        mockMvc.perform(get("/api/v1/users/999"))
+        // when, then
+        mockMvc.perform(get("/api/v1/users/999")
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isNotFound());
     }
 
+    @SneakyThrows
+    @Test
+    void accessWithoutToken_ShouldReturnUnauthorized() {
+        mockMvc.perform(get("/api/v1/users"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @SneakyThrows
+    @Test
+    void accessWithInsufficientRole_ShouldReturnForbidden() {
+        // Получаем токен пользователя с ролью USER
+        String userToken = obtainJwtToken("testUser", "testPassword");
+
+        mockMvc.perform(get("/api/v1/users")
+                        .header("Authorization", "Bearer " + userToken))
+                .andExpect(status().isForbidden());
+    }
 }

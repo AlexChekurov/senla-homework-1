@@ -6,15 +6,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Set;
 
 
 @Entity
@@ -37,12 +35,12 @@ public class Transaction {
     @Column(name = "currency", nullable = false, length = 3)
     private String currency;
 
-    @ManyToMany
-    @JoinTable(
-            name = "transaction_accounts",
-            joinColumns = @JoinColumn(name = "transaction_id"),
-            inverseJoinColumns = @JoinColumn(name = "account_id")
-    )
-    private Set<Account> accounts;
+    @ManyToOne
+    @JoinColumn(name = "from_account_id", nullable = false)
+    private Account fromAccount;
+
+    @ManyToOne
+    @JoinColumn(name = "to_account_id", nullable = false)
+    private Account toAccount;
 
 }

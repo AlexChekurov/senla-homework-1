@@ -1,7 +1,9 @@
 package com.alex.homework4example.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
 
 public interface CrudService<Entity, DTO> {
 
@@ -21,9 +23,10 @@ public interface CrudService<Entity, DTO> {
 
     boolean deleteById(Long id);
 
-    int deleteAll();
+    void deleteAll();
 
     List<DTO> findAll();
 
+    List<DTO> findAll(int page, int size, Map<String, Object> params);
 
 }

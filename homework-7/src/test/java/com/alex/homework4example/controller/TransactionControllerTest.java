@@ -2,167 +2,203 @@ package com.alex.homework4example.controller;
 
 import com.alex.homework4example.config.AppConfig;
 import com.alex.homework4example.config.DataBaseConfig;
+import com.alex.homework4example.dto.AccountDTO;
 import com.alex.homework4example.dto.TransactionDTO;
-import com.alex.homework4example.entity.Transaction;
 import com.alex.homework4example.handlers.GlobalExceptionHandler;
-import com.alex.homework4example.repository.TransactionRepository;
-import com.alex.homework4example.service.TransactionService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.jdbc.*;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.*;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringJUnitConfig(classes = { AppConfig.class, DataBaseConfig.class, GlobalExceptionHandler.class })
 @WebAppConfiguration
 @TestPropertySource(locations = "classpath:application-test.properties")
+@Sql(
+        scripts = { "classpath:sql/transactions_test_data.sql" },
+        config = @SqlConfig(encoding = "UTF-8")
+)
+@Transactional
 class TransactionControllerTest {
 
     private MockMvc mockMvc;
+    private String jwtToken;
 
     @Autowired
     private TransactionController transactionController;
 
     @Autowired
-    private TransactionService transactionService;
-
-    @Autowired
-    private TransactionRepository transactionRepository;
-
-    @Autowired
     private GlobalExceptionHandler globalExceptionHandler;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @BeforeEach
-    public void setUp() {
+    void setUp() throws Exception {
         this.mockMvc = MockMvcBuilders.standaloneSetup(transactionController)
                 .setControllerAdvice(globalExceptionHandler)
                 .build();
 
-        transactionRepository.deleteAll();
+        // Получаем JWT-токен
+        jwtToken = obtainJwtToken("testUser", "testPassword");
+    }
+
+    @SneakyThrows
+    private String obtainJwtToken(String username, String password) {
+        String content = "{ \"username\": \"" + username + "\", \"password\": \"" + password + "\" }";
+
+        MvcResult result = mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(content))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String token = result.getResponse().getHeader("Authorization");
+        assertThat(token).isNotNull();
+
+        return token.replace("Bearer ", "");
     }
 
     @SneakyThrows
     @Test
     void createTransaction() {
-        //given
-        String transactionJson = """
-                {
-                    "amount": 1000.00,
-                    "transactionDate": "2023-09-26T10:15:30",
-                    "sourceAccountId": 1,
-                    "destinationAccountId": 2,
-                    "currency": "USD"
-                }
-                """;
-        //when
-        mockMvc.perform(post("/api/v1/transactions")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(transactionJson))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.amount").value(1000.00))
-                .andExpect(jsonPath("$.currency").value("USD"));
+        // given
+        AccountDTO fromAccount = new AccountDTO();
+        fromAccount.setId(505L);
+        fromAccount.setAccountNumber("1234567890");
+        fromAccount.setAccountType("SAVINGS");
+        fromAccount.setBalance(BigDecimal.valueOf(1000.00));
+        fromAccount.setCurrency("USD");
+        fromAccount.setIban("US12345678901234567890123456");
+        fromAccount.setCustomerId(404L);
 
-        //then
-        assertThat(transactionRepository.findAll()).hasSize(1);
-        Transaction transaction = transactionRepository.findAll().get(0);
-        assertThat(transaction.getAmount()).isEqualByComparingTo(BigDecimal.valueOf(1000.00));
-        assertThat(transaction.getCurrency()).isEqualTo("USD");
+        AccountDTO toAccount = new AccountDTO();
+        toAccount.setId(606L);
+        toAccount.setAccountNumber("0987654321");
+        toAccount.setAccountType("CHECKING");
+        toAccount.setBalance(BigDecimal.valueOf(500.00));
+        toAccount.setCurrency("USD");
+        toAccount.setIban("US09876543210987654321098765");
+        toAccount.setCustomerId(404L);
+
+        TransactionDTO transaction = new TransactionDTO();
+        transaction.setAmount(BigDecimal.valueOf(12341.00));
+        transaction.setTransactionDate(LocalDateTime.now());
+        transaction.setFromAccount(fromAccount);
+        transaction.setToAccount(toAccount);
+        transaction.setCurrency("USD");
+
+        // when
+        String transactionJson = mockMvc.perform(post("/api/v1/transactions")
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(transaction)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.amount").value(12341.00))
+                .andExpect(jsonPath("$.currency").value("USD"))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Integer recordId = JsonPath.read(transactionJson, "$.id");
+
+        // then
+        mockMvc.perform(get("/api/v1/transactions/" + recordId)
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.amount").value(12341.00))
+                .andExpect(jsonPath("$.currency").value("USD"));
     }
 
     @SneakyThrows
     @Test
     void getAllTransactions() {
-        //given
-        transactionService.create(new TransactionDTO(null, BigDecimal.valueOf(1000.00),
-                LocalDateTime.now(), 1L, 2L, "USD"));
-
-        //when
-        mockMvc.perform(get("/api/v1/transactions"))
+        // when
+        String response = mockMvc.perform(get("/api/v1/transactions")
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].amount").value(1000.00));
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
 
-        //then
-        assertThat(transactionRepository.findAll()).hasSize(1);
+        // then
+        TransactionDTO[] transactions = objectMapper.readValue(response, TransactionDTO[].class);
+        assertThat(transactions).hasSizeGreaterThanOrEqualTo(1)
+                .extracting(TransactionDTO::getAmount)
+                .contains(BigDecimal.valueOf(200.50).setScale(2, RoundingMode.HALF_UP));
     }
 
     @SneakyThrows
     @Test
     void getTransactionById() {
-        //given
-        TransactionDTO createdTransaction = transactionService.create(new TransactionDTO(null,
-                BigDecimal.valueOf(1000.00), LocalDateTime.now(), 1L, 2L, "USD"));
-
-        //when
-        mockMvc.perform(get("/api/v1/transactions/" + createdTransaction.getId()))
+        // then
+        mockMvc.perform(get("/api/v1/transactions/909")
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.amount").value(1000.00));
-
-        //then
-        assertThat(transactionRepository.findById(createdTransaction.getId())).isPresent();
+                .andExpect(jsonPath("$.amount").value(300.75))
+                .andExpect(jsonPath("$.currency").value("EUR"));
     }
 
     @SneakyThrows
     @Test
     void getTransactionById_NotFound() {
-        //when
-        mockMvc.perform(get("/api/v1/transactions/999"))
+        // then
+        mockMvc.perform(get("/api/v1/transactions/999")
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Can't find entity with id: 999"));
-
-        //then
-        assertThat(transactionRepository.findAll()).isEmpty();
     }
 
     @SneakyThrows
     @Test
     void updateTransaction() {
-        //given
-        TransactionDTO createdTransaction = transactionService.create(new TransactionDTO(null,
-                BigDecimal.valueOf(1000.00), LocalDateTime.now(), 1L, 2L, "USD"));
-        String updatedTransactionJson = """
-                {
-                    "amount": 2000.00,
-                    "transactionDate": "2023-09-26T11:15:30",
-                    "sourceAccountId": 1,
-                    "destinationAccountId": 2,
-                    "currency": "EUR"
-                }
-                """;
-
-        //when
-        mockMvc.perform(put("/api/v1/transactions/" + createdTransaction.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(updatedTransactionJson))
+        // given
+        String responseString = mockMvc.perform(get("/api/v1/transactions/808")
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.amount").value(2000.00))
-                .andExpect(jsonPath("$.currency").value("EUR"));
+                .andExpect(jsonPath("$.currency").value("USD"))
+                .andReturn().getResponse().getContentAsString();
 
-        //then
-        Transaction updatedTransaction = transactionRepository.findById(createdTransaction.getId()).get();
-        assertThat(updatedTransaction.getAmount()).isEqualByComparingTo(BigDecimal.valueOf(2000.00));
-        assertThat(updatedTransaction.getCurrency()).isEqualTo("EUR");
+        String putRequest = responseString.replaceAll("USD", "RUB");
+
+        // when
+        mockMvc.perform(put("/api/v1/transactions/808")
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(putRequest))
+                .andExpect(status().isOk());
+
+        // then
+        mockMvc.perform(get("/api/v1/transactions/808")
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.currency").value("RUB"));
     }
 
     @SneakyThrows
     @Test
     void updateTransaction_NotFound() {
-        //given
+        // given
         String updatedTransactionJson = """
                 {
                     "amount": 2000.00,
@@ -173,29 +209,34 @@ class TransactionControllerTest {
                 }
                 """;
 
-        //when
+        // when
         mockMvc.perform(put("/api/v1/transactions/999")
+                        .header("Authorization", "Bearer " + jwtToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updatedTransactionJson))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Can't update transaction with id: 999"));
-
-        //then
-        assertThat(transactionRepository.findAll()).isEmpty();
     }
 
     @SneakyThrows
     @Test
     void deleteTransaction() {
-        //given
-        TransactionDTO createdTransaction = transactionService.create(new TransactionDTO(null,
-                BigDecimal.valueOf(1000.00), LocalDateTime.now(), 1L, 2L, "USD"));
+        // when
+        mockMvc.perform(delete("/api/v1/transactions/707")
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isNoContent());
 
-        //when
-        mockMvc.perform(delete("/api/v1/transactions/" + createdTransaction.getId()))
-                .andExpect(status().isOk());
+        // then
+        mockMvc.perform(get("/api/v1/transactions/707")
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Can't find entity with id: 707"));
+    }
 
-        //then
-        assertThat(transactionRepository.findById(createdTransaction.getId())).isNotPresent();
+    @SneakyThrows
+    @Test
+    void accessWithoutToken_ShouldReturnUnauthorized() {
+        mockMvc.perform(get("/api/v1/transactions"))
+                .andExpect(status().isUnauthorized());
     }
 }

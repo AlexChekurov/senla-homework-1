@@ -7,7 +7,9 @@ import com.alex.homework4example.service.CrudService;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
 
 @AllArgsConstructor
 public abstract class AbstractCrudService<E, D> implements CrudService<E, D> {
@@ -62,15 +64,21 @@ public abstract class AbstractCrudService<E, D> implements CrudService<E, D> {
     }
 
     @Override
-    public int deleteAll() {
-        return repository.deleteAll();
+    public void deleteAll() {
+        repository.deleteAll();
     }
 
     @Override
-
     public List<D> findAll() {
         return repository.findAll().stream()
                 .map(mapper::toDto)
                 .toList();
     }
+
+    public List<D> findAll(int page, int size, Map<String, Object> params) {
+        return repository.findAll(page, size, params).stream()
+                .map(mapper::toDto)
+                .toList();
+    }
+
 }

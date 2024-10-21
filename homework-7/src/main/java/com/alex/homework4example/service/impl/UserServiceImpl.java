@@ -5,15 +5,23 @@ import com.alex.homework4example.entity.User;
 import com.alex.homework4example.exception.EntityNotFoundException;
 import com.alex.homework4example.mapper.CommonMapper;
 import com.alex.homework4example.repository.AbstractRepository;
+import com.alex.homework4example.repository.UserRepository;
 import com.alex.homework4example.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 
 @Service
-public class UserServiceImpl extends AbstractCrudService<User, UserDTO> implements UserService {
+public class UserServiceImpl extends AbstractCrudService<User, UserDTO> implements UserService, UserDetailsService {
 
-    public UserServiceImpl(AbstractRepository<User> repository, CommonMapper<User, UserDTO> mapper) {
+    private final UserRepository userRepository;
+
+    @Autowired
+    public UserServiceImpl(AbstractRepository<User> repository, CommonMapper<User, UserDTO> mapper, UserRepository userRepository) {
         super(repository, mapper);
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -27,4 +35,14 @@ public class UserServiceImpl extends AbstractCrudService<User, UserDTO> implemen
                 .orElseThrow(() -> new EntityNotFoundException("Can't update user with id: " + id));
     }
 
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findByUsername(username)
+                .map(user -> new org.springframework.security.core.userdetails.User(
+                        user.getUsername(),
+                        user.getPassword(),
+                        Collections.singleton(user.getRole())
+                ))
+                .orElseThrow(() -> new UsernameNotFoundException("Failed to retrieve user: " + username));
+    }
 }
